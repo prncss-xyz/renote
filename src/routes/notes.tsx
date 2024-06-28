@@ -3,7 +3,7 @@ import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
 import { useCreateNote } from "@/hooks/createNote";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
-import { Button, Flex, Heading, IconButton, Select } from "@radix-ui/themes";
+import { Flex, Heading, IconButton, Select } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SelectNotesOpts,
@@ -34,7 +34,6 @@ export function Component() {
             <Dir />
           </Flex>
           <NoteList />
-          <ClearAll />
         </Flex>
         <Flex direction="column" width="100%">
           <Flex direction="column" width="100%">
@@ -93,10 +92,6 @@ function CreateNote() {
       <PlusIcon />
     </IconButton>
   );
-}
-
-function ClearAll() {
-  return <Button>Clear all</Button>;
 }
 
 function NoteList() {

@@ -1,6 +1,7 @@
 import { NoteMeta, noteZero } from "@/core/models";
 import {
   QueryClient,
+  queryOptions,
   useMutation,
   useQueryClient,
   useSuspenseQuery,
@@ -15,32 +16,56 @@ const dbPromise = openDB("notes", 1, {
 });
 
 async function getNotesMeta(): Promise<NoteMeta[]> {
-  return await dbPromise.then((db) => db.getAll("metadata"));
+  const db = await dbPromise;
+  return await db.getAll("metadata");
 }
 
+const getNotesOpts = queryOptions({
+  queryKey: ["notes", "metadata"],
+  queryFn: getNotesMeta,
+});
+
 export function prefetchNotesMeta(queryClient: QueryClient) {
-  return queryClient.prefetchQuery({
-    queryKey: ["notes", "metadata"],
-    queryFn: getNotesMeta,
-  });
+  return queryClient.prefetchQuery(getNotesOpts);
 }
 
 export function useNotesMeta(
   select?: ((data: NoteMeta[]) => NoteMeta[]) | undefined,
 ) {
   return useSuspenseQuery({
-    queryKey: ["notes", "metadata"],
-    queryFn: getNotesMeta,
+    ...getNotesOpts,
     select,
   });
 }
 
+async function clearDbNotes() {
+  const db = await dbPromise;
+  const tx = db.transaction(["metadata", "contents"], "readwrite");
+  tx.objectStore("metadata").clear();
+  tx.objectStore("contents").clear();
+  await tx.done;
+}
+
+export function useClearNotes() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: clearDbNotes,
+    onMutate: async () => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
+        queryClient.cancelQueries({ queryKey: ["notes", "contents"] }),
+      ]);
+      queryClient.setQueryData(["notes", "metadata"], []);
+    },
+  });
+}
+
 async function upsertDbNote(meta: NoteMeta, contents: string) {
-  // TODO: transaction
-  return await Promise.all([
-    dbPromise.then((db) => db.put("metadata", meta)),
-    dbPromise.then((db) => db.put("contents", contents, meta.id)),
-  ]);
+  const db = await dbPromise;
+  const tx = db.transaction(["metadata", "contents"], "readwrite");
+  tx.objectStore("metadata").put(meta);
+  tx.objectStore("contents").put(contents, meta.id);
+  await tx.done;
 }
 
 function upsertCacheMeta(arr: NoteMeta[], meta: NoteMeta) {
@@ -57,36 +82,39 @@ export function useUpsertNote() {
     mutationFn: ({ meta, contents }: { meta: NoteMeta; contents: string }) =>
       upsertDbNote(meta, contents),
     onMutate: async ({ meta, contents }) => {
-      await queryClient.cancelQueries({ queryKey: ["notes", "metadata"] });
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
+        queryClient.cancelQueries({ queryKey: ["notes", "contents", meta.id] }),
+      ]);
       queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
         upsertCacheMeta(old, meta),
       );
-      await queryClient.cancelQueries({ queryKey: ["notes", "contents"] });
-      queryClient.setQueryData(["notes", "contents"], () => contents);
+      queryClient.setQueryData(["notes", "contents", meta.id], contents);
     },
   });
 }
 
 async function getNoteContents(id: string): Promise<string> {
-  return (await dbPromise.then((db) => db.get("contents", id))) || "";
+  const db = await dbPromise;
+  return (await db.get("contents", id)) || "";
+}
+
+function getNoteContentsOpts(id: string) {
+  return queryOptions({
+    queryKey: ["notes", "contents", id],
+    queryFn: () => getNoteContents(id),
+  });
 }
 
 export function prefetchNoteContents(queryClient: QueryClient, id: string) {
-  return queryClient.prefetchQuery({
-    queryKey: ["notes", "contents", id],
-    queryFn: () => getNoteContents(id),
-  });
+  return queryClient.prefetchQuery(getNoteContentsOpts(id));
 }
 
 export function useNoteContents(id: string) {
-  return useSuspenseQuery({
-    queryKey: ["notes", "contents", id],
-    queryFn: () => getNoteContents(id),
-  });
+  return useSuspenseQuery(getNoteContentsOpts(id));
 }
 
 async function deleteNote(id: string, now: number) {
-  // TODO: transaction
   const db = await dbPromise;
   await db.put("metadata", { ...noteZero, id, mtime: now });
   await db.delete("contents", id);
@@ -104,7 +132,6 @@ export function useDeleteNote() {
       queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
         upsertCacheMeta(old, { ...noteZero, id, mtime: Date.now() }),
       );
-      queryClient.setQueryData(["notes", "contents"], () => "");
     },
   });
 }

@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as SettingsImport } from './routes/settings'
 import { Route as NotesImport } from './routes/notes'
 import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
 
@@ -24,6 +25,11 @@ const NotesCreateIndexLazyImport = createFileRoute('/notes/create/')()
 const NotesCreateIdLazyImport = createFileRoute('/notes/create/$id')()
 
 // Create/Update Routes
+
+const SettingsRoute = SettingsImport.update({
+  path: '/settings',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const NotesRoute = NotesImport.update({
   path: '/notes',
@@ -79,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesImport
       parentRoute: typeof rootRoute
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsImport
+      parentRoute: typeof rootRoute
+    }
     '/notes/edit/$id': {
       id: '/notes/edit/$id'
       path: '/edit/$id'
@@ -120,6 +133,7 @@ export const routeTree = rootRoute.addChildren({
     NotesCreateIndexLazyRoute,
     NotesEditIndexLazyRoute,
   }),
+  SettingsRoute,
 })
 
 /* prettier-ignore-end */
@@ -131,7 +145,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/notes"
+        "/notes",
+        "/settings"
       ]
     },
     "/": {
@@ -145,6 +160,9 @@ export const routeTree = rootRoute.addChildren({
         "/notes/create/",
         "/notes/edit/"
       ]
+    },
+    "/settings": {
+      "filePath": "settings.tsx"
     },
     "/notes/edit/$id": {
       "filePath": "notes/edit/$id.tsx",

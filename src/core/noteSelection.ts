@@ -8,15 +8,20 @@ export const sortByNames = {
 
 export type SortByOpts = keyof typeof sortByNames;
 
-const sortBy0: SortByOpts = "title";
+const sortByZero: SortByOpts = "title";
 
 export function normalizeSortBy(sortBy: unknown): SortByOpts {
-  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : sortBy0;
+  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : sortByZero;
 }
 
 export type SelectNotesOpts = {
   desc: boolean;
   sortBy: SortByOpts;
+};
+
+export const selectNotesOptsZero = {
+  desc: false,
+  sortBy: sortByZero,
 };
 
 function btimeSort(a: NoteMeta, b: NoteMeta) {
