@@ -12,18 +12,16 @@ import { selectNotesOptsZero } from "@/core/noteSelection";
 
 export const Route = createRootRouteWithContext<MyRooterContext>()({
   component: () => (
-    <>
-      <Flex direction="column" gap="2">
-        <Flex direction="row" gap="2">
-          <Link to="/notes" search={selectNotesOptsZero}>
-            Notes
-          </Link>
-          <Link to="/settings">Settings</Link>
-        </Flex>
-        <Outlet />
+    <Flex direction="column" gap="2">
+      <Flex direction="row" gap="2">
+        <Link to="/notes/edit" search={selectNotesOptsZero}>
+          Notes
+        </Link>
+        <Link to="/settings">Settings</Link>
       </Flex>
+      <Outlet />
       <TanStackRouterDevtools />
       <ReactQueryDevtools initialIsOpen={false} />
-    </>
+    </Flex>
   ),
 });

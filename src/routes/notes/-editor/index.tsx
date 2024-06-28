@@ -14,7 +14,7 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
 import ToolbarPlugin from "./plugins/toolBar";
-import { Card, Flex, IconButton } from "@radix-ui/themes";
+import { Card, Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
 import { NoteMeta } from "@/core/models";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDeleteNote, useNotesMeta } from "@/db";
@@ -22,6 +22,43 @@ import { useRouter, useSearch } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { findNext, selectNotes } from "@/core/noteSelection";
 import { getUUID } from "@/utils/uuid";
+import { serialize } from "./encoding";
+
+export function Editor({
+  meta,
+  contents,
+}: {
+  meta: NoteMeta;
+  contents: string;
+}) {
+  return (
+    <LexicalComposer
+      key={meta.id}
+      initialConfig={{
+        ...config,
+        editorState: () => serialize(contents),
+      }}
+    >
+      <Flex direction="column" gap="1">
+        <Flex justify="end">
+          <DeleteNote id={meta.id} />
+        </Flex>
+        {/* <ToolbarPlugin /> */}
+        <Card>
+          <RichTextPlugin
+            contentEditable={<ContentEditable />}
+            placeholder={<></>}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+        </Card>
+        <MarkdownShortcutPlugin />
+        <AutoFocusPlugin />
+        <OnChangePlugin meta={meta} contents={contents} />
+      </Flex>
+      <HistoryPlugin />
+    </LexicalComposer>
+  );
+}
 
 function onError(error: unknown) {
   console.error(error);
@@ -40,6 +77,16 @@ const config = {
   ],
   onError,
 };
+
+function DeleteNote({ id }: { id: string }) {
+  const deleteNote = useDelete(id);
+  return (
+    <IconButton onClick={deleteNote}>
+      <TrashIcon />
+      <VisuallyHidden>Delete note</VisuallyHidden>
+    </IconButton>
+  );
+}
 
 function useDelete(id: string) {
   const search = useSearch({ strict: false });
@@ -62,40 +109,4 @@ function useDelete(id: string) {
       });
     deleteNote(id);
   }, [id, notes]);
-}
-
-export function Editor({
-  meta,
-  contents,
-}: {
-  meta: NoteMeta;
-  contents: string;
-}) {
-  const deleteNote = useDelete(meta.id);
-  return (
-    <LexicalComposer
-      key={meta.id}
-      initialConfig={{ ...config, editorState: contents }}
-    >
-      <Flex direction="column" gap="1">
-        <Flex justify="end">
-          <IconButton onClick={deleteNote}>
-            <TrashIcon />
-          </IconButton>
-        </Flex>
-        {/* <ToolbarPlugin /> */}
-        <Card>
-          <RichTextPlugin
-            contentEditable={<ContentEditable />}
-            placeholder={<></>}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-        </Card>
-        <MarkdownShortcutPlugin />
-        <AutoFocusPlugin />
-        <OnChangePlugin meta={meta} contents={contents} />
-      </Flex>
-      <HistoryPlugin />
-    </LexicalComposer>
-  );
 }

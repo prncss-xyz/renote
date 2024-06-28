@@ -3,7 +3,13 @@ import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
 import { useCreateNote } from "@/hooks/createNote";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
-import { Flex, Heading, IconButton, Select } from "@radix-ui/themes";
+import {
+  Flex,
+  Heading,
+  IconButton,
+  Select,
+  VisuallyHidden,
+} from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
@@ -68,15 +74,18 @@ function SortBy() {
 function Dir() {
   const search = useSearch({ from: Route.fullPath });
   const { asc } = search;
+  // visually hidden describes the effect of the link, not the actual state
   if (asc)
     return (
       <Link search={{ ...search, asc: false }}>
         <ArrowUpIcon />
+        <VisuallyHidden>Sort by ascending</VisuallyHidden>
       </Link>
     );
   return (
     <Link search={{ ...search, asc: true }}>
       <ArrowDownIcon />
+      <VisuallyHidden>Sort by descending</VisuallyHidden>
     </Link>
   );
 }
@@ -86,6 +95,7 @@ function CreateNote() {
   return (
     <IconButton onClick={createNote}>
       <PlusIcon />
+      <VisuallyHidden>Create new note</VisuallyHidden>
     </IconButton>
   );
 }

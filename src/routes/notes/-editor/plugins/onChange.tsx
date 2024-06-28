@@ -4,6 +4,7 @@ import { NoteMeta } from "@/core/models";
 import { getDeduper } from "@/utils/deduper";
 import { useUpsertNote } from "@/db";
 import { useNavigate } from "@tanstack/react-router";
+import { deserialize } from "../encoding";
 
 function fold<T>(node: any, acc: T, cb: (acc: T, node: any) => T) {
   if (!node) return acc;
@@ -65,26 +66,29 @@ export function OnChangePlugin({
         ),
     );
     return editor.registerUpdateListener(({ editorState }) => {
-      const serizalizedState = editorState.toJSON();
-      const now = Date.now();
-      const newContents = JSON.stringify(serizalizedState);
-      if (newContents === contents) return;
-      commit(meta.id, {
-        meta: {
-          ...meta,
-          btime: meta.btime || now,
-          mtime: now,
-          ttime: now,
-          title: toText(
-            find(serizalizedState.root, (node) => node.type === "heading"),
-          ),
-        },
-        contents: newContents,
+      editorState.read(() => {
+        const now = Date.now();
+        const newContents = deserialize();
+        if (newContents === contents) return;
+        const serizalizedState = editorState.toJSON();
+        commit(meta.id, {
+          meta: {
+            ...meta,
+            btime: meta.btime || now,
+            mtime: now,
+            ttime: now,
+            title: toText(
+              find(serizalizedState.root, (node) => node.type === "heading"),
+            ).trim(),
+          },
+          contents: newContents,
+        });
       });
     });
-  }, [editor]);
+  }, [meta, editor]);
+  const id = meta.id;
   useEffect(() => {
-    return () => console.log("should flush", meta.id);
-  }, [editor]);
+    return () => console.log("should flush", id);
+  }, [id, editor]);
   return null;
 }

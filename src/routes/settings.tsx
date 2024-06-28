@@ -33,14 +33,16 @@ function ClearAll() {
           <Dialog.Close>
             <Button variant="solid">Cancel</Button>
           </Dialog.Close>
-          <Button
-            variant="outline"
-            onClick={() => {
-              mutate();
-            }}
-          >
-            Clear all
-          </Button>
+          <Dialog.Close>
+            <Button
+              variant="outline"
+              onClick={() => {
+                mutate();
+              }}
+            >
+              Clear all
+            </Button>
+          </Dialog.Close>
         </Flex>
       </Dialog.Content>
     </Dialog.Root>
