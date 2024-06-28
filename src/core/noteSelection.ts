@@ -1,26 +1,58 @@
 import { NoteMeta } from "./models";
 
 export const sortByNames = {
+  title: "Title",
   mtime: "Modified",
   btime: "Created",
 };
 
-export function normalizeSortBy(sortBy: unknown): SortByOpts {
-  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : "btime";
-}
-
 export type SortByOpts = keyof typeof sortByNames;
+
+const sortBy0: SortByOpts = "title";
+
+export function normalizeSortBy(sortBy: unknown): SortByOpts {
+  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : sortBy0;
+}
 
 export type SelectNotesOpts = {
   desc: boolean;
   sortBy: SortByOpts;
 };
 
+function btimeSort(a: NoteMeta, b: NoteMeta) {
+  return b.btime - a.btime;
+}
+
+function mtimeSort(a: NoteMeta, b: NoteMeta) {
+  return b.mtime - a.mtime;
+}
+
+// TODO: make configurable
+const collator = new Intl.Collator();
+
+function titleSort(a: NoteMeta, b: NoteMeta) {
+  const cmp = collator.compare(b.title, a.title);
+  if (cmp === 0) return btimeSort(a, b);
+  return cmp;
+}
+
+function getSortCb(sortBy: SortByOpts) {
+  switch (sortBy) {
+    case "title":
+      return titleSort;
+    case "mtime":
+      return mtimeSort;
+    case "btime":
+      return btimeSort;
+  }
+}
+
 export function selectNotes({ desc, sortBy }: SelectNotesOpts) {
   return function (notes: NoteMeta[]) {
     notes = notes.filter((note) => note.btime);
     const sgn = desc ? -1 : 1;
-    notes.sort((a, b) => sgn * (b[sortBy] - a[sortBy]));
+    const cb = getSortCb(sortBy);
+    notes.sort((a, b) => sgn * cb(a, b));
     return notes;
   };
 }
