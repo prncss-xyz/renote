@@ -8,6 +8,7 @@ export function useCreateNote() {
     router.navigate({
       to: "/notes/create/$id",
       params: { id: getUUID() },
+      search: (x: any) => x,
     });
   }, [router]);
 }

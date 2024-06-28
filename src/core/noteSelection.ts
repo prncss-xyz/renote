@@ -1,11 +1,15 @@
 import { NoteMeta } from "./models";
 
-export const sortBy = {
+export const sortByNames = {
   mtime: "Modified",
   btime: "Created",
 };
 
-export type SortByOpts = keyof typeof sortBy;
+export function normalizeSortBy(sortBy: unknown): SortByOpts {
+  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : "btime";
+}
+
+export type SortByOpts = keyof typeof sortByNames;
 
 export type SelectNotesOpts = {
   desc: boolean;

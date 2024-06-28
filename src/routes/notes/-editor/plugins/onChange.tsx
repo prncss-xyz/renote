@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { NoteMeta } from "@/core/models";
 import { getDeduper } from "@/utils/deduper";
 import { useUpsertNote } from "@/db";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 
 function fold<T>(node: any, acc: T, cb: (acc: T, node: any) => T) {
   if (!node) return acc;
@@ -34,7 +34,7 @@ export function OnChangePlugin({
 }) {
   const [editor] = useLexicalComposerContext();
   const { mutate } = useUpsertNote();
-  const router = useRouter();
+  const navigate = useNavigate();
   useEffect(() => {
     const commit = getDeduper(
       1000,
@@ -50,11 +50,14 @@ export function OnChangePlugin({
       ) =>
         mutate(
           { meta, contents },
+          // this is useful when commming from '/notes/create/$id'
           {
             onSettled: () => {
-              router.navigate({
+              navigate({
                 to: "/notes/edit/$id",
-                params: { id: meta.id },
+                params: {
+                  id: meta.id,
+                },
                 search: (x: any) => x,
               });
             },
@@ -69,6 +72,7 @@ export function OnChangePlugin({
       commit(meta.id, {
         meta: {
           ...meta,
+          btime: meta.btime || now,
           mtime: now,
           ttime: now,
           title: toText(
@@ -78,6 +82,9 @@ export function OnChangePlugin({
         contents: newContents,
       });
     });
+  }, [editor]);
+  useEffect(() => {
+    return () => console.log("should flush", meta.id);
   }, [editor]);
   return null;
 }

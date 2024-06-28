@@ -87,10 +87,9 @@ export function useNoteContents(id: string) {
 
 async function deleteNote(id: string, now: number) {
   // TODO: transaction
-  return await Promise.all([
-    dbPromise.then((db) => db.put("metadata", { ...noteZero, id, mtime: now })),
-    dbPromise.then((db) => db.delete("contents", id)),
-  ]);
+  const db = await dbPromise;
+  await db.put("metadata", { ...noteZero, id, mtime: now });
+  await db.delete("contents", id);
 }
 
 export function useDeleteNote() {

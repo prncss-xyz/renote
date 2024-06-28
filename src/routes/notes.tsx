@@ -8,8 +8,9 @@ import { Link, useSearch } from "@tanstack/react-router";
 import {
   SelectNotesOpts,
   SortByOpts,
+  normalizeSortBy,
   selectNotes,
-  sortBy,
+  sortByNames,
 } from "@/core/noteSelection";
 
 export const Route = createFileRoute("/notes")({
@@ -17,9 +18,7 @@ export const Route = createFileRoute("/notes")({
   loader: ({ context: { queryClient } }) => prefetchNotesMeta(queryClient),
   validateSearch: (search: Record<string, unknown>): SelectNotesOpts => ({
     desc: Boolean(search.desc),
-    sortBy: (String(search.order) in sortBy
-      ? search.order
-      : "btime") as SortByOpts,
+    sortBy: normalizeSortBy(search.sortBy),
   }),
 });
 
@@ -61,7 +60,7 @@ function SortBy() {
     >
       <Select.Trigger />
       <Select.Content>
-        {Object.entries(sortBy).map(([key, value]) => (
+        {Object.entries(sortByNames).map(([key, value]) => (
           <Select.Item key={key} value={key}>
             {value}
           </Select.Item>

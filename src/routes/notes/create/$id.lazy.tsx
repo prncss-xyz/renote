@@ -1,6 +1,6 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { contentsZero, noteZero } from "@/core/models";
-import { Editor } from "@/components/editor";
+import { Editor } from "../-editor";
 
 export const Route = createLazyFileRoute("/notes/create/$id")({
   component: Component,
@@ -8,6 +8,6 @@ export const Route = createLazyFileRoute("/notes/create/$id")({
 
 function Component() {
   const { id } = Route.useParams();
-  const meta = { ...noteZero, id, btime: Date.now() };
+  const meta = { ...noteZero, id };
   return <Editor meta={meta} contents={contentsZero} />;
 }

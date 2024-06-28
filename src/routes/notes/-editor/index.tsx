@@ -21,6 +21,7 @@ import { useDeleteNote, useNotesMeta } from "@/db";
 import { useRouter, useSearch } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { findNext, selectNotes } from "@/core/noteSelection";
+import { getUUID } from "@/utils/uuid";
 
 function onError(error: unknown) {
   console.error(error);
@@ -46,15 +47,21 @@ function useDelete(id: string) {
   const { mutate: deleteNote } = useDeleteNote();
   const router = useRouter();
   return useCallback(() => {
-    deleteNote(id, {
-      onSettled: () =>
-        router.navigate({
-          to: "/notes/edit/$id",
-          params: { id: findNext(notes, id) },
-          search: search as any,
-        }),
-    });
-  }, [id]);
+    const id_ = findNext(notes, id);
+    if (id_)
+      router.navigate({
+        to: "/notes/edit/$id",
+        params: { id: id_ },
+        search: (x: any) => x,
+      });
+    else
+      router.navigate({
+        to: "/notes/create/$id",
+        params: { id: getUUID() },
+        search: (x: any) => x,
+      });
+    deleteNote(id);
+  }, [id, notes]);
 }
 
 export function Editor({
