@@ -6,20 +6,16 @@ import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Flex, Heading, IconButton, Select } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
-  SelectNotesOpts,
   SortByOpts,
-  normalizeSortBy,
   selectNotes,
   sortByNames,
+  validateSelectNotesOpts,
 } from "@/core/noteSelection";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
   loader: ({ context: { queryClient } }) => prefetchNotesMeta(queryClient),
-  validateSearch: (search: Record<string, unknown>): SelectNotesOpts => ({
-    desc: Boolean(search.desc),
-    sortBy: normalizeSortBy(search.sortBy),
-  }),
+  validateSearch: validateSelectNotesOpts,
 });
 
 export function Component() {
@@ -71,16 +67,16 @@ function SortBy() {
 
 function Dir() {
   const search = useSearch({ from: Route.fullPath });
-  const { desc } = search;
-  if (desc)
+  const { asc } = search;
+  if (asc)
     return (
-      <Link search={{ ...search, desc: false }}>
-        <ArrowDownIcon />
+      <Link search={{ ...search, asc: false }}>
+        <ArrowUpIcon />
       </Link>
     );
   return (
-    <Link search={{ ...search, desc: true }}>
-      <ArrowUpIcon />
+    <Link search={{ ...search, asc: true }}>
+      <ArrowDownIcon />
     </Link>
   );
 }

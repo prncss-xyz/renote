@@ -10,17 +10,17 @@ export type SortByOpts = keyof typeof sortByNames;
 
 const sortByZero: SortByOpts = "title";
 
-export function normalizeSortBy(sortBy: unknown): SortByOpts {
+export function validateSortBy(sortBy: unknown): SortByOpts {
   return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : sortByZero;
 }
 
 export type SelectNotesOpts = {
-  desc: boolean;
+  asc: boolean;
   sortBy: SortByOpts;
 };
 
 export const selectNotesOptsZero = {
-  desc: false,
+  asc: false,
   sortBy: sortByZero,
 };
 
@@ -52,10 +52,17 @@ function getSortCb(sortBy: SortByOpts) {
   }
 }
 
-export function selectNotes({ desc, sortBy }: SelectNotesOpts) {
+export function validateSelectNotesOpts(opts: Record<string, unknown>) {
+  return {
+    asc: Boolean(opts.asc),
+    sortBy: validateSortBy(opts.sortBy),
+  };
+}
+
+export function selectNotes({ asc, sortBy }: SelectNotesOpts) {
   return function (notes: NoteMeta[]) {
     notes = notes.filter((note) => note.btime);
-    const sgn = desc ? -1 : 1;
+    const sgn = asc ? 1 : -1;
     const cb = getSortCb(sortBy);
     notes.sort((a, b) => sgn * cb(a, b));
     return notes;
