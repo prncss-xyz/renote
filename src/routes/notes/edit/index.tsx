@@ -1,22 +1,29 @@
+import { selectNotes } from "@/core/noteSelection";
 import { useNotesMeta } from "@/db";
 import { useCreateNote } from "@/hooks/createNote";
-import { createLazyFileRoute, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useRouter,
+  useSearch,
+} from "@tanstack/react-router";
 import { useEffect } from "react";
 
-export const Route = createLazyFileRoute("/notes/edit/")({
+export const Route = createFileRoute("/notes/edit/")({
   component: Component,
 });
 
 function Component() {
   const router = useRouter();
-  const notes = useNotesMeta().data;
+  const search = useSearch({ from: "/notes" });
+  const notes = useNotesMeta(selectNotes(search)).data;
+  const id = notes[0]?.id;
   const createNote = useCreateNote();
   useEffect(() => {
-    if (notes.length === 0) createNote();
+    if (!id) createNote();
     else
       router.navigate({
         to: "/notes/edit/$id",
-        params: { id: notes[0].id },
+        params: { id },
         search: (x) => x as any,
       });
   }, [router, notes, createNote]);

@@ -15,12 +15,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
 import { Route as NotesImport } from './routes/notes'
+import { Route as NotesEditIndexImport } from './routes/notes/edit/index'
 import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
 
 // Create Virtual Routes
 
 const IndexLazyImport = createFileRoute('/')()
-const NotesEditIndexLazyImport = createFileRoute('/notes/edit/')()
 const NotesCreateIndexLazyImport = createFileRoute('/notes/create/')()
 const NotesCreateIdLazyImport = createFileRoute('/notes/create/$id')()
 
@@ -41,19 +41,17 @@ const IndexLazyRoute = IndexLazyImport.update({
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
 
-const NotesEditIndexLazyRoute = NotesEditIndexLazyImport.update({
-  path: '/edit/',
-  getParentRoute: () => NotesRoute,
-} as any).lazy(() =>
-  import('./routes/notes/edit/index.lazy').then((d) => d.Route),
-)
-
 const NotesCreateIndexLazyRoute = NotesCreateIndexLazyImport.update({
   path: '/create/',
   getParentRoute: () => NotesRoute,
 } as any).lazy(() =>
   import('./routes/notes/create/index.lazy').then((d) => d.Route),
 )
+
+const NotesEditIndexRoute = NotesEditIndexImport.update({
+  path: '/edit/',
+  getParentRoute: () => NotesRoute,
+} as any)
 
 const NotesCreateIdLazyRoute = NotesCreateIdLazyImport.update({
   path: '/create/$id',
@@ -106,18 +104,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesCreateIdLazyImport
       parentRoute: typeof NotesImport
     }
+    '/notes/edit/': {
+      id: '/notes/edit/'
+      path: '/edit'
+      fullPath: '/notes/edit'
+      preLoaderRoute: typeof NotesEditIndexImport
+      parentRoute: typeof NotesImport
+    }
     '/notes/create/': {
       id: '/notes/create/'
       path: '/create'
       fullPath: '/notes/create'
       preLoaderRoute: typeof NotesCreateIndexLazyImport
-      parentRoute: typeof NotesImport
-    }
-    '/notes/edit/': {
-      id: '/notes/edit/'
-      path: '/edit'
-      fullPath: '/notes/edit'
-      preLoaderRoute: typeof NotesEditIndexLazyImport
       parentRoute: typeof NotesImport
     }
   }
@@ -130,8 +128,8 @@ export const routeTree = rootRoute.addChildren({
   NotesRoute: NotesRoute.addChildren({
     NotesEditIdRoute,
     NotesCreateIdLazyRoute,
+    NotesEditIndexRoute,
     NotesCreateIndexLazyRoute,
-    NotesEditIndexLazyRoute,
   }),
   SettingsRoute,
 })
@@ -157,8 +155,8 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/notes/edit/$id",
         "/notes/create/$id",
-        "/notes/create/",
-        "/notes/edit/"
+        "/notes/edit/",
+        "/notes/create/"
       ]
     },
     "/settings": {
@@ -172,12 +170,12 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "notes/create/$id.lazy.tsx",
       "parent": "/notes"
     },
-    "/notes/create/": {
-      "filePath": "notes/create/index.lazy.tsx",
+    "/notes/edit/": {
+      "filePath": "notes/edit/index.tsx",
       "parent": "/notes"
     },
-    "/notes/edit/": {
-      "filePath": "notes/edit/index.lazy.tsx",
+    "/notes/create/": {
+      "filePath": "notes/create/index.lazy.tsx",
       "parent": "/notes"
     }
   }

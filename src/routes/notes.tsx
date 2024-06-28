@@ -107,7 +107,7 @@ function NoteList() {
       }}
       search={search}
     >
-      {note.title || <em>{note.id}</em>}
+      {note.title || <em>untitled</em>}
     </Link>
   ));
 }
