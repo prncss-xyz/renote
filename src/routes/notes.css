@@ -1,0 +1,18 @@
+.note-list a {
+  text-decoration: none;
+  color: var(--gray-12);
+  overflow-x: scroll;
+  &:hover {
+    color: var(--accent-10);
+  }
+  &.active {
+    background-color: var(--gray-5);
+  }
+}
+
+.note-dir a {
+  color: var(--gray-12);
+  &:hover {
+    color: var(--accent-10);
+  }
+}

@@ -4,8 +4,8 @@ import { useNotesMeta } from "@/db";
 import { useCreateNote } from "@/hooks/createNote";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
 import {
+  Box,
   Flex,
-  Heading,
   IconButton,
   Select,
   VisuallyHidden,
@@ -17,6 +17,7 @@ import {
   sortByNames,
   validateSelectNotesOpts,
 } from "@/core/noteSelection";
+import "./notes.css";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
@@ -30,8 +31,7 @@ export function Component() {
       <Flex width="100%" gap="3">
         <Flex width="300px" direction="column" gap="2">
           <CreateNote />
-          <Heading as="h2">Notes</Heading>
-          <Flex gap="1" justify="between">
+          <Flex gap="1" justify="between" align="center" className="note-dir">
             <SortBy />
             <Dir />
           </Flex>
@@ -66,7 +66,7 @@ function SortBy() {
             {value}
           </Select.Item>
         ))}
-      </Select.Content>
+      </Select.Content>{" "}
     </Select.Root>
   );
 }
@@ -103,17 +103,21 @@ function CreateNote() {
 function NoteList() {
   const search = useSearch({ from: Route.fullPath });
   const notes = useNotesMeta(selectNotes(search)).data;
-  return notes.map((note) => (
-    <Link
-      key={note.id}
-      from={Route.fullPath}
-      to="/notes/edit/$id"
-      params={{
-        id: note.id,
-      }}
-      search={search}
-    >
-      {note.title || <em>untitled</em>}
-    </Link>
-  ));
+  return (
+    <Flex direction="column" className="note-list">
+      {notes.map((note) => (
+        <Link
+          key={note.id}
+          from={Route.fullPath}
+          to="/notes/edit/$id"
+          params={{
+            id: note.id,
+          }}
+          search={search}
+        >
+          <Box px="2">{note.title || <em>untitled</em>}</Box>
+        </Link>
+      ))}
+    </Flex>
+  );
 }

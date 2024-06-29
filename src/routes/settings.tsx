@@ -1,5 +1,5 @@
 import { useClearNotes } from "@/db";
-import { Button, Dialog, Flex, Heading } from "@radix-ui/themes";
+import { Button, Dialog, Flex } from "@radix-ui/themes";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/settings")({
@@ -9,7 +9,6 @@ export const Route = createFileRoute("/settings")({
 function Component() {
   return (
     <Flex direction="column" gap="4">
-      <Heading>Settings</Heading>
       <Flex>
         <ClearAll />
       </Flex>
