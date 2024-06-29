@@ -1,7 +1,7 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { NoteMeta } from "@/core/models";
-import { getDeduper } from "@/utils/deduper";
+import { useFlushedDebounced } from "@/utils/deduper";
 import { useUpsertNote } from "@/db";
 import { useNavigate } from "@tanstack/react-router";
 import { deserialize } from "../encoding";
@@ -26,6 +26,10 @@ function toText(node: any) {
   return fold(node, "", (acc, node) => (node.text ? acc + node.text : ""));
 }
 
+function commit({ meta, contents }: { meta: NoteMeta; contents: string }) {
+  console.log("commit", meta, contents);
+}
+
 export function OnChangePlugin({
   meta,
   contents,
@@ -36,42 +40,33 @@ export function OnChangePlugin({
   const [editor] = useLexicalComposerContext();
   const { mutate } = useUpsertNote();
   const navigate = useNavigate();
-  useEffect(() => {
-    const commit = getDeduper(
-      1000,
-      (
-        _key,
+  const update = useFlushedDebounced(
+    5000,
+    ({ meta, contents }: { meta: NoteMeta; contents: string }) =>
+      mutate(
+        { meta, contents },
+        // this is useful when commming from '/notes/create/$id'
         {
-          meta,
-          contents,
-        }: {
-          meta: NoteMeta;
-          contents: string;
-        },
-      ) =>
-        mutate(
-          { meta, contents },
-          // this is useful when commming from '/notes/create/$id'
-          {
-            onSettled: () => {
-              navigate({
-                to: "/notes/edit/$id",
-                params: {
-                  id: meta.id,
-                },
-                search: (x: any) => x,
-              });
-            },
+          onSettled: () => {
+            navigate({
+              to: "/notes/edit/$id",
+              params: {
+                id: meta.id,
+              },
+              search: (x: any) => x,
+            });
           },
-        ),
-    );
+        },
+      ),
+  );
+  useEffect(() => {
     return editor.registerUpdateListener(({ editorState }) => {
       editorState.read(() => {
         const now = Date.now();
         const newContents = deserialize();
         if (newContents === contents) return;
         const serizalizedState = editorState.toJSON();
-        commit(meta.id, {
+        update({
           meta: {
             ...meta,
             btime: meta.btime || now,
@@ -86,9 +81,5 @@ export function OnChangePlugin({
       });
     });
   }, [meta, editor]);
-  const id = meta.id;
-  useEffect(() => {
-    return () => console.log("should flush", id);
-  }, [id, editor]);
   return null;
 }
