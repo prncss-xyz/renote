@@ -18,6 +18,7 @@ import {
   validateSelectNotesOpts,
 } from "@/core/noteSelection";
 import "./notes.css";
+import { NoteMeta } from "@/core/models";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
@@ -100,6 +101,40 @@ function CreateNote() {
   );
 }
 
+function toDate(btime: number, time: boolean) {
+  let yourDate = new Date(btime);
+  const offset = yourDate.getTimezoneOffset();
+  yourDate = new Date(yourDate.getTime() - offset * 60 * 1000);
+  const [d, rest] = yourDate.toISOString().split("T");
+  if (!time) return d;
+  const [h, m] = rest.split(":");
+  return `${d} ${h}:${m}`;
+}
+
+function NoteWithTitle({ title }: { title: string }) {
+  return (
+    <Flex px="2" justify="start">
+      {title}
+    </Flex>
+  );
+}
+
+function NoteWithDate({ date }: { date: number }) {
+  return (
+    <Flex px="2" justify="start" style={{ fontStyle: "italic" }}>
+      {toDate(date, true)}
+    </Flex>
+  );
+}
+
+function Note({ note }: { note: NoteMeta }) {
+  return note.title ? (
+    <NoteWithTitle title={note.title} />
+  ) : (
+    <NoteWithDate date={note.btime} />
+  );
+}
+
 function NoteList() {
   const search = useSearch({ from: Route.fullPath });
   const notes = useNotesMeta(selectNotes(search)).data;
@@ -115,7 +150,7 @@ function NoteList() {
           }}
           search={search}
         >
-          <Box px="2">{note.title || <em>untitled</em>}</Box>
+          <Note note={note} />
         </Link>
       ))}
     </Flex>

@@ -2,8 +2,8 @@ import { NoteMeta } from "./models";
 
 export const sortByNames = {
   title: "Title",
-  mtime: "Modified",
   btime: "Created",
+  mtime: "Modified",
 };
 
 export type SortByOpts = keyof typeof sortByNames;
