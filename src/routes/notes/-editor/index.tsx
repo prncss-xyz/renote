@@ -19,7 +19,7 @@ import { NoteMeta } from "@/core/models";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDeleteNote, useNotesMeta } from "@/db";
 import { useRouter, useSearch } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { findNext, selectNotes } from "@/core/noteSelection";
 import { getUUID } from "@/utils/uuid";
 import { serialize } from "./encoding";
@@ -79,21 +79,26 @@ const config = {
 };
 
 function DeleteNote({ id }: { id: string }) {
-  const deleteNote = useDelete(id);
+  const onClick = useDelete(id);
   return (
-    <IconButton onClick={deleteNote}>
+    <IconButton onClick={onClick}>
       <TrashIcon />
       <VisuallyHidden>Delete note</VisuallyHidden>
     </IconButton>
   );
 }
 
+// TODO: we need a global state to make note disappear from noteList before deletion
+
+// When we want to delete a note, we must first unmount the note's route
+// in order to avoid a "note has been deleted" message
 function useDelete(id: string) {
+  const { mutate: deleteNote } = useDeleteNote();
+  const shouldDelete = useRef(false);
+  const router = useRouter();
   const search = useSearch({ strict: false });
   const notes = useNotesMeta(selectNotes(search as any)).data;
-  const { mutate: deleteNote } = useDeleteNote();
-  const router = useRouter();
-  return useCallback(() => {
+  const onClick = useCallback(() => {
     const id_ = findNext(notes, id);
     if (id_)
       router.navigate({
@@ -107,6 +112,13 @@ function useDelete(id: string) {
         params: { id: getUUID() },
         search: (x: any) => x,
       });
-    deleteNote(id);
+    shouldDelete.current = true;
   }, [id, notes]);
+  useEffect(() => {
+    return () => {
+      if (!shouldDelete.current) return;
+      deleteNote(id);
+    };
+  }, [id]);
+  return onClick;
 }
