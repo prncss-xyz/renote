@@ -33,7 +33,13 @@ interface Data {
   pathname: string;
 }
 
-export function OnChangePlugin({ meta, contents }: Data) {
+export function OnChangePlugin({
+  meta,
+  contents,
+}: {
+  meta: NoteMeta;
+  contents: string;
+}) {
   const [editor] = useLexicalComposerContext();
   const { mutate } = useUpsertNote();
   const navigate = useNavigate();

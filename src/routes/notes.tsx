@@ -1,7 +1,15 @@
 import { ensureNotesMeta } from "@/db";
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  createFileRoute,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
-import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  PlusIcon,
+} from "@radix-ui/react-icons";
 import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {

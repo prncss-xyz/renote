@@ -6,8 +6,8 @@ import {
   useNoteMeta,
 } from "@/db/index";
 import { Box } from "@radix-ui/themes";
-import { Editor } from "../-editor";
 import { useState } from "react";
+import { Editor } from "../-editor";
 
 export const Route = createFileRoute("/notes/edit/$id")({
   component: Component,
