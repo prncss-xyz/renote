@@ -13,16 +13,21 @@ import { LinkNode } from "@lexical/link";
 import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
-import ToolbarPlugin from "./plugins/toolBar";
+/* import ToolbarPlugin from "./plugins/toolBar"; */
 import { Card, Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
-import { NoteMeta } from "@/core/models";
+import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { TrashIcon } from "@radix-ui/react-icons";
 import { useDeleteNote, useNotesMeta } from "@/db";
 import { useRouter, useSearch } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef } from "react";
 import { findNext, selectNotes } from "@/core/noteSelection";
-import { getUUID } from "@/utils/uuid";
 import { serialize } from "./encoding";
+
+export function EditorCreate({ id }: { id: string }) {
+  const meta = { ...noteZero, id };
+  const contents = contentsZero;
+  return <Editor meta={meta} contents={contents} />;
+}
 
 export function Editor({
   meta,
@@ -95,30 +100,29 @@ function DeleteNote({ id }: { id: string }) {
 function useDelete(id: string) {
   const { mutate: deleteNote } = useDeleteNote();
   const shouldDelete = useRef(false);
-  const router = useRouter();
+  const { navigate } = useRouter();
   const search = useSearch({ strict: false });
   const notes = useNotesMeta(selectNotes(search as any)).data;
   const onClick = useCallback(() => {
     const id_ = findNext(notes, id);
     if (id_)
-      router.navigate({
+      navigate({
         to: "/notes/edit/$id",
         params: { id: id_ },
         search: (x: any) => x,
       });
     else
-      router.navigate({
-        to: "/notes/create/$id",
-        params: { id: getUUID() },
+      navigate({
+        to: "/notes/create",
         search: (x: any) => x,
       });
     shouldDelete.current = true;
-  }, [id, notes]);
+  }, [navigate, id, notes]);
   useEffect(() => {
     return () => {
       if (!shouldDelete.current) return;
       deleteNote(id);
     };
-  }, [id]);
+  }, [shouldDelete, id]);
   return onClick;
 }

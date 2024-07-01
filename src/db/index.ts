@@ -25,8 +25,30 @@ const getNotesOpts = queryOptions({
   queryFn: getNotesMeta,
 });
 
-export function prefetchNotesMeta(queryClient: QueryClient) {
-  return queryClient.prefetchQuery(getNotesOpts);
+export function fetchNotesMeta(queryClient: QueryClient) {
+  return queryClient.fetchQuery(getNotesOpts);
+}
+
+export function ensureNotesMeta(queryClient: QueryClient) {
+  return queryClient.ensureQueryData(getNotesOpts);
+}
+
+export async function fetchNote(queryClient: QueryClient, id: string) {
+  const [meta, contents] = await Promise.all([
+    queryClient
+      .fetchQuery(getNotesOpts)
+      .then((arr) => arr.find((note) => note.id === id)),
+    queryClient.fetchQuery(getNoteContentsOpts(id)),
+  ]);
+  return { meta, contents };
+}
+
+export function useNoteMeta(id: string) {
+  // PERF: should stop searching when we find the first match
+  const notesMeta = useNotesMeta((arr) => arr.filter((m) => m.id === id)).data;
+  const data = notesMeta[0];
+  if (!data) throw new Error(`Note ${id} not found`);
+  return { data };
 }
 
 export function useNotesMeta(
@@ -106,8 +128,8 @@ function getNoteContentsOpts(id: string) {
   });
 }
 
-export function prefetchNoteContents(queryClient: QueryClient, id: string) {
-  return queryClient.prefetchQuery(getNoteContentsOpts(id));
+export function ensureNoteContents(queryClient: QueryClient, id: string) {
+  return queryClient.ensureQueryData(getNoteContentsOpts(id));
 }
 
 export function useNoteContents(id: string) {

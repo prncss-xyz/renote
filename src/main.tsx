@@ -5,14 +5,15 @@ import "@radix-ui/themes/styles.css";
 import { Theme } from "@radix-ui/themes";
 import { Container } from "@radix-ui/themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import "./main.css";
 
 import { routeTree } from "./routeTree.gen";
 
 const queryClient = new QueryClient();
 
-export interface MyRooterContext {
+export type MyRooterContext = {
   queryClient: QueryClient;
-}
+};
 
 const context: MyRooterContext = {
   queryClient,
@@ -31,7 +32,6 @@ declare module "@tanstack/react-router" {
   }
 }
 
-// Render the app
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);

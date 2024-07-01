@@ -1,23 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
-  prefetchNoteContents,
+  ensureNoteContents,
+  ensureNotesMeta,
   useNoteContents,
-  useNotesMeta,
+  useNoteMeta,
 } from "@/db/index";
 import { Box } from "@radix-ui/themes";
 import { Editor } from "../-editor";
+import { useState } from "react";
 
 export const Route = createFileRoute("/notes/edit/$id")({
   component: Component,
-  loader: ({ context: { queryClient }, params: { id } }) =>
-    prefetchNoteContents(queryClient, id),
+  loader: ({ params: { id }, context: { queryClient } }) =>
+    Promise.all([
+      ensureNotesMeta(queryClient),
+      ensureNoteContents(queryClient, id),
+    ]),
 });
 
-function Component() {
+export function Component() {
   const { id } = Route.useParams();
-  const notes = useNotesMeta().data;
-  const contents = useNoteContents(id).data;
-  const meta = notes.find((note) => note.id === id);
+  return <Note key={id} id={id} />;
+}
+
+export function Note({ id }: { id: string }) {
+  // when using a loader insteat of hooks, loader doesn't run on redirect, unless nativage is wrapped
+  // in a timout; also prevents from using links
+
+  // this is useful to prevent rerendering when data change is caused by an external event
+  // which is currently not hapenning
+  const [meta] = useState(useNoteMeta(id).data);
+  const [contents] = useState(useNoteContents(id).data);
   if (!meta) return <NotFound currentId={id} />;
   if (!meta.btime) return <Deleted currentId={id} />;
   return <Editor meta={meta} contents={contents} />;

@@ -1,15 +1,8 @@
-import { prefetchNotesMeta } from "@/db";
+import { ensureNotesMeta } from "@/db";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
-import { useCreateNote } from "@/hooks/createNote";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
-import {
-  Box,
-  Flex,
-  IconButton,
-  Select,
-  VisuallyHidden,
-} from "@radix-ui/themes";
+import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
@@ -22,7 +15,7 @@ import { NoteMeta } from "@/core/models";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
-  loader: ({ context: { queryClient } }) => prefetchNotesMeta(queryClient),
+  loader: ({ context: { queryClient } }) => ensureNotesMeta(queryClient),
   validateSearch: validateSelectNotesOpts,
 });
 
@@ -67,7 +60,7 @@ function SortBy() {
             {value}
           </Select.Item>
         ))}
-      </Select.Content>{" "}
+      </Select.Content>
     </Select.Root>
   );
 }
@@ -92,11 +85,12 @@ function Dir() {
 }
 
 function CreateNote() {
-  const createNote = useCreateNote();
   return (
-    <IconButton onClick={createNote}>
-      <PlusIcon />
-      <VisuallyHidden>Create new note</VisuallyHidden>
+    <IconButton asChild>
+      <Link to="/notes/create" search={(x: any) => x}>
+        <PlusIcon />
+        <VisuallyHidden>Create new note</VisuallyHidden>
+      </Link>
     </IconButton>
   );
 }
