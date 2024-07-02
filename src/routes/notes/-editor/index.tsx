@@ -45,7 +45,7 @@ export function Editor({
       <Flex direction="column" gap="2" overflow="hidden">
         <NavNotes id={meta.id} />
         {/* <ToolbarPlugin /> */}
-        <Box overflow="scroll">
+        <Box overflowY="auto">
           <Card className="editor">
             <RichTextPlugin
               contentEditable={<ContentEditable />}

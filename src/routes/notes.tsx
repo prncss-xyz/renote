@@ -7,13 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
-import {
-  Box,
-  Flex,
-  IconButton,
-  Select,
-  VisuallyHidden,
-} from "@radix-ui/themes";
+import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
@@ -33,7 +27,7 @@ export const Route = createFileRoute("/notes")({
 
 export function Component() {
   return (
-    <Flex direction="row" gap="3" flexGrow="1">
+    <Flex direction="row" gap="3" flexGrow="1" px="1">
       <Flex direction="column" width="250px" gap="2">
         <Flex direction="row" gap="1">
           <Fuzzy />
@@ -148,7 +142,7 @@ function NotesList() {
   const search = useSearch({ from: Route.fullPath });
   const notes = useNotesMeta(selectNotes(search)).data;
   return (
-    <Flex flexGrow="1" direction="column" overflow="scroll">
+    <Flex flexGrow="1" direction="column" overflowY="auto">
       {notes.map((note) => (
         <Link
           key={note.id}

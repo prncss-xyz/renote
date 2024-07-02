@@ -21,7 +21,7 @@ function Notes() {
   });
   return (
     <TabNav.Link active={active} asChild>
-      <Link to="/redirect" search={selectNotesOptsZero}>
+      <Link to="/" search={selectNotesOptsZero}>
         Notes
       </Link>
     </TabNav.Link>

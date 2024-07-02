@@ -12,10 +12,9 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as SettingsImport } from './routes/settings'
-import { Route as RedirectImport } from './routes/redirect'
 import { Route as NotesImport } from './routes/notes'
 import { Route as IndexImport } from './routes/index'
-import { Route as NotesIndexImport } from './routes/notes/index'
+import { Route as NotesEmptyImport } from './routes/notes/empty'
 import { Route as NotesCreateImport } from './routes/notes/create'
 import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
 
@@ -23,11 +22,6 @@ import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
 
 const SettingsRoute = SettingsImport.update({
   path: '/settings',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const RedirectRoute = RedirectImport.update({
-  path: '/redirect',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -41,8 +35,8 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const NotesIndexRoute = NotesIndexImport.update({
-  path: '/',
+const NotesEmptyRoute = NotesEmptyImport.update({
+  path: '/empty',
   getParentRoute: () => NotesRoute,
 } as any)
 
@@ -74,13 +68,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesImport
       parentRoute: typeof rootRoute
     }
-    '/redirect': {
-      id: '/redirect'
-      path: '/redirect'
-      fullPath: '/redirect'
-      preLoaderRoute: typeof RedirectImport
-      parentRoute: typeof rootRoute
-    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -95,11 +82,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NotesCreateImport
       parentRoute: typeof NotesImport
     }
-    '/notes/': {
-      id: '/notes/'
-      path: '/'
-      fullPath: '/notes/'
-      preLoaderRoute: typeof NotesIndexImport
+    '/notes/empty': {
+      id: '/notes/empty'
+      path: '/empty'
+      fullPath: '/notes/empty'
+      preLoaderRoute: typeof NotesEmptyImport
       parentRoute: typeof NotesImport
     }
     '/notes/edit/$id': {
@@ -118,10 +105,9 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   NotesRoute: NotesRoute.addChildren({
     NotesCreateRoute,
-    NotesIndexRoute,
+    NotesEmptyRoute,
     NotesEditIdRoute,
   }),
-  RedirectRoute,
   SettingsRoute,
 })
 
@@ -135,7 +121,6 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/",
         "/notes",
-        "/redirect",
         "/settings"
       ]
     },
@@ -146,12 +131,9 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "notes.tsx",
       "children": [
         "/notes/create",
-        "/notes/",
+        "/notes/empty",
         "/notes/edit/$id"
       ]
-    },
-    "/redirect": {
-      "filePath": "redirect.tsx"
     },
     "/settings": {
       "filePath": "settings.tsx"
@@ -160,8 +142,8 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "notes/create.tsx",
       "parent": "/notes"
     },
-    "/notes/": {
-      "filePath": "notes/index.tsx",
+    "/notes/empty": {
+      "filePath": "notes/empty.tsx",
       "parent": "/notes"
     },
     "/notes/edit/$id": {
