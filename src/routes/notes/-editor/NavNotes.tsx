@@ -1,9 +1,20 @@
 import { NoteMeta } from "@/core/models";
 import { selectNotes, findNext } from "@/core/noteSelection";
 import { useDeleteNote, useNotesMeta } from "@/db";
-import { TrashIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon, ArrowLeftIcon, ArrowRightIcon } from "@radix-ui/react-icons";
+import {
+  TrashIcon,
+  DoubleArrowLeftIcon,
+  DoubleArrowRightIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+} from "@radix-ui/react-icons";
 import { Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
-import { useRouter, useSearch, Link } from "@tanstack/react-router";
+import {
+  useRouter,
+  useSearch,
+  Link,
+  useLocation,
+} from "@tanstack/react-router";
 import { useRef, useCallback, useEffect, ReactNode } from "react";
 
 export function NavNotes({ id }: { id: string }) {
@@ -20,8 +31,10 @@ export function NavNotes({ id }: { id: string }) {
 
 function DeleteNote({ id }: { id: string }) {
   const onClick = useDelete(id);
+  const { pathname } = useLocation();
+  const disabled = pathname === "/notes/create";
   return (
-    <IconButton onClick={onClick}>
+    <IconButton onClick={onClick} disabled={disabled}>
       <TrashIcon />
       <VisuallyHidden>Delete note</VisuallyHidden>
     </IconButton>
@@ -77,8 +90,8 @@ function SelectNote({
   children: ReactNode;
 }) {
   const target = select(useNotes());
-  const active = !target || target?.id === id;
-  if (active) return <IconButton disabled={true}>{children}</IconButton>;
+  const disabled = !target || target?.id === id;
+  if (disabled) return <IconButton disabled={true}>{children}</IconButton>;
   return (
     <IconButton asChild>
       <Link

@@ -1,5 +1,5 @@
 import { ensureNotesMeta } from "@/db";
-import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
@@ -89,8 +89,10 @@ function Dir() {
 }
 
 function CreateNote() {
+  const { pathname } = useLocation();
+  const disabled = pathname === "/notes/create";
   return (
-    <IconButton asChild>
+    <IconButton disabled={disabled} asChild>
       <Link to="/notes/create" search={(x: any) => x}>
         <PlusIcon />
         <VisuallyHidden>Create new note</VisuallyHidden>
