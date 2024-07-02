@@ -14,7 +14,7 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
 /* import ToolbarPlugin from "./plugins/toolBar"; */
-import { Card, Flex } from "@radix-ui/themes";
+import { Box, Card, Flex } from "@radix-ui/themes";
 import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { serialize } from "./encoding";
 import { NavNotes } from "./NavNotes";
@@ -24,6 +24,8 @@ export function EditorCreate({ id }: { id: string }) {
   const contents = contentsZero;
   return <Editor meta={meta} contents={contents} />;
 }
+
+import "./index.css";
 
 export function Editor({
   meta,
@@ -40,16 +42,18 @@ export function Editor({
         editorState: () => serialize(contents),
       }}
     >
-      <Flex direction="column" gap="2">
+      <Flex direction="column" gap="2" overflow="hidden">
         <NavNotes id={meta.id} />
         {/* <ToolbarPlugin /> */}
-        <Card>
-          <RichTextPlugin
-            contentEditable={<ContentEditable />}
-            placeholder={<></>}
-            ErrorBoundary={LexicalErrorBoundary}
-          />
-        </Card>
+        <Box overflow="scroll">
+          <Card className="editor">
+            <RichTextPlugin
+              contentEditable={<ContentEditable />}
+              placeholder={<></>}
+              ErrorBoundary={LexicalErrorBoundary}
+            />
+          </Card>
+        </Box>
         <MarkdownShortcutPlugin />
         <AutoFocusPlugin />
         <OnChangePlugin meta={meta} contents={contents} />

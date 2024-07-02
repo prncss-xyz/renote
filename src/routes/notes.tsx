@@ -1,8 +1,19 @@
 import { ensureNotesMeta } from "@/db";
-import { Outlet, createFileRoute, useLocation, useNavigate } from "@tanstack/react-router";
+import {
+  Outlet,
+  createFileRoute,
+  useLocation,
+  useNavigate,
+} from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
 import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
-import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Select,
+  VisuallyHidden,
+} from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
@@ -22,24 +33,22 @@ export const Route = createFileRoute("/notes")({
 
 export function Component() {
   return (
-    <Flex direction="column" gap="4">
-      <Flex width="100%" gap="3">
-        <Flex width="300px" direction="column" gap="2">
-          <Flex gap="1" direction="row">
-            <Fuzzy />
-            <CreateNote />
-          </Flex>
-          <Flex gap="1" justify="between" align="center" className="notes__dir">
-            <SortBy />
-            <Dir />
-          </Flex>
+    <Flex direction="row" gap="3" flexGrow="1">
+      <Flex direction="column" width="250px" gap="2">
+        <Flex direction="row" gap="1">
+          <Fuzzy />
+          <CreateNote />
+        </Flex>
+        <Flex direction="row" gap="1" justify="between" align="center">
+          <SortBy />
+          <Dir />
+        </Flex>
+        <Flex direction="column" flexGrow="1" style={{ containerType: "size" }}>
           <NotesList />
         </Flex>
-        <Flex direction="column" width="100%">
-          <Flex direction="column" width="100%">
-            <Outlet />
-          </Flex>
-        </Flex>
+      </Flex>
+      <Flex direction="column" flexGrow="1" style={{ containerType: "size" }}>
+        <Outlet />
       </Flex>
     </Flex>
   );
@@ -75,13 +84,13 @@ function Dir() {
   // visually hidden describes the effect of the link, not the actual state
   if (asc)
     return (
-      <Link search={{ ...search, asc: false }}>
+      <Link className="notes__dir__link" search={{ ...search, asc: false }}>
         <ArrowUpIcon />
         <VisuallyHidden>Sort by ascending</VisuallyHidden>
       </Link>
     );
   return (
-    <Link search={{ ...search, asc: true }}>
+    <Link className="notes__dir__link" search={{ ...search, asc: true }}>
       <ArrowDownIcon />
       <VisuallyHidden>Sort by descending</VisuallyHidden>
     </Link>
@@ -139,7 +148,7 @@ function NotesList() {
   const search = useSearch({ from: Route.fullPath });
   const notes = useNotesMeta(selectNotes(search)).data;
   return (
-    <Flex direction="column" className="notes__list">
+    <Flex flexGrow="1" direction="column" overflow="scroll">
       {notes.map((note) => (
         <Link
           key={note.id}
@@ -149,6 +158,7 @@ function NotesList() {
             id: note.id,
           }}
           search={search}
+          className="notes__list__link"
         >
           <Note note={note} />
         </Link>

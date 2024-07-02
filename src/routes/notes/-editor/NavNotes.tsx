@@ -34,7 +34,7 @@ function DeleteNote({ id }: { id: string }) {
   const { pathname } = useLocation();
   const disabled = pathname === "/notes/create";
   return (
-    <IconButton onClick={onClick} disabled={disabled}>
+    <IconButton variant="outline" onClick={onClick} disabled={disabled}>
       <TrashIcon />
       <VisuallyHidden>Delete note</VisuallyHidden>
     </IconButton>
@@ -91,9 +91,14 @@ function SelectNote({
 }) {
   const target = select(useNotes());
   const disabled = !target || target?.id === id;
-  if (disabled) return <IconButton disabled={true}>{children}</IconButton>;
+  if (disabled)
+    return (
+      <IconButton variant="outline" disabled={true}>
+        {children}
+      </IconButton>
+    );
   return (
-    <IconButton asChild>
+    <IconButton variant="outline" asChild>
       <Link
         to="/notes/edit/$id"
         params={{ id: target.id }}

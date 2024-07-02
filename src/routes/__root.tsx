@@ -43,7 +43,7 @@ const showThemePanel = false;
 
 function Component() {
   return (
-    <Flex direction="column" gap="3">
+    <Flex direction="column" height="100vh" maxHeight="100vh" gap="3">
       <TabNav.Root>
         <Notes />
         <Settings />
