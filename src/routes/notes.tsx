@@ -1,15 +1,7 @@
 import { ensureNotesMeta } from "@/db";
-import {
-  Outlet,
-  createFileRoute,
-  useNavigate,
-} from "@tanstack/react-router";
+import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
-import {
-  ArrowDownIcon,
-  ArrowUpIcon,
-  PlusIcon,
-} from "@radix-ui/react-icons";
+import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
 import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
@@ -20,6 +12,7 @@ import {
 } from "@/core/noteSelection";
 import "./notes.css";
 import { NoteMeta } from "@/core/models";
+import { Fuzzy } from "./-fuzzy";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
@@ -32,12 +25,15 @@ export function Component() {
     <Flex direction="column" gap="4">
       <Flex width="100%" gap="3">
         <Flex width="300px" direction="column" gap="2">
-          <CreateNote />
-          <Flex gap="1" justify="between" align="center" className="note-dir">
+          <Flex gap="1" direction="row">
+            <Fuzzy />
+            <CreateNote />
+          </Flex>
+          <Flex gap="1" justify="between" align="center" className="notes__dir">
             <SortBy />
             <Dir />
           </Flex>
-          <NoteList />
+          <NotesList />
         </Flex>
         <Flex direction="column" width="100%">
           <Flex direction="column" width="100%">
@@ -137,11 +133,11 @@ function Note({ note }: { note: NoteMeta }) {
   );
 }
 
-function NoteList() {
+function NotesList() {
   const search = useSearch({ from: Route.fullPath });
   const notes = useNotesMeta(selectNotes(search)).data;
   return (
-    <Flex direction="column" className="note-list">
+    <Flex direction="column" className="notes__list">
       {notes.map((note) => (
         <Link
           key={note.id}

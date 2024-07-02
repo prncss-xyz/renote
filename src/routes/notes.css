@@ -1,4 +1,4 @@
-.note-list a {
+.notes__list a {
   text-decoration: none;
   color: var(--gray-12);
   overflow-x: scroll;
@@ -9,10 +9,20 @@
     background-color: var(--gray-5);
   }
 }
-
-.note-dir a {
+.notes__dir a {
   color: var(--gray-12);
   &:hover {
     color: var(--accent-10);
   }
+}
+
+.fuzzy__input {
+  outline: none;
+}
+.fuzzy__item {
+  text-decoration: none;
+  color: var(--gray-11);
+}
+.fuzzy__highlight {
+  color: var(--accent-10);
 }

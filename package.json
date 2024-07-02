@@ -24,6 +24,7 @@
     "@tanstack/react-query": "^5.48.0",
     "@tanstack/react-query-devtools": "^5.48.0",
     "@tanstack/react-router": "^1.40.0",
+    "fuzzysort": "^3.0.2",
     "idb": "^8.0.0",
     "lexical": "^0.16.0",
     "nanoid": "^5.0.7",

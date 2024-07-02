@@ -47,6 +47,9 @@ importers:
       '@tanstack/react-router':
         specifier: ^1.40.0
         version: 1.40.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      fuzzysort:
+        specifier: ^3.0.2
+        version: 3.0.2
       idb:
         specifier: ^8.0.0
         version: 8.0.0
@@ -1732,6 +1735,9 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
+
+  fuzzysort@3.0.2:
+    resolution: {integrity: sha512-ZyahVgxvckB1Qosn7YGWLDJJp2XlyaQ2WmZeI+d0AzW0AMqVYnz5N89G6KAKa6m/LOtv+kzJn4lhDF/yVg11Cg==}
 
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -4252,6 +4258,8 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
+
+  fuzzysort@3.0.2: {}
 
   gensync@1.0.0-beta.2: {}
 
