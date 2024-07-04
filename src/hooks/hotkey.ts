@@ -13,5 +13,5 @@ export function useHotkey(
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [callback]);
+  }, [callback, ctrl, key]);
 }

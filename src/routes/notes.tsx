@@ -6,11 +6,17 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { useNotesMeta } from "@/db";
-import { ArrowDownIcon, ArrowUpIcon, PlusIcon } from "@radix-ui/react-icons";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  PlusIcon,
+  TrashIcon,
+} from "@radix-ui/react-icons";
 import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
+  expendNotes,
   selectNotes,
   sortByNames,
   validateSelectNotesOpts,
@@ -27,21 +33,22 @@ export const Route = createFileRoute("/notes")({
 
 export function Component() {
   return (
-    <Flex direction="row" gap="3" flexGrow="1" px="1">
+    <Flex direction="row" gap="3" flexGrow="1">
       <Flex direction="column" width="250px" gap="2">
         <Flex direction="row" gap="1">
           <Fuzzy />
+          <Trash />
           <CreateNote />
         </Flex>
         <Flex direction="row" gap="1" justify="between" align="center">
           <SortBy />
           <Dir />
         </Flex>
-        <Flex direction="column" flexGrow="1" style={{ containerType: "size" }}>
+        <Flex direction="column" flexGrow="1">
           <NotesList />
         </Flex>
       </Flex>
-      <Flex direction="column" flexGrow="1" style={{ containerType: "size" }}>
+      <Flex direction="column" flexGrow="1">
         <Outlet />
       </Flex>
     </Flex>
@@ -91,12 +98,38 @@ function Dir() {
   );
 }
 
+function Trash() {
+  const search = useSearch({ from: Route.fullPath });
+  const notesMeta = useNotesMeta().data;
+  // FIX: this value is not reactive
+  const { trash } = expendNotes(search)(notesMeta);
+  if (search.trash) {
+    return (
+      <IconButton variant="solid" asChild>
+        <Link to="/" search={{ ...search, trash: false }}>
+          <TrashIcon />
+          <VisuallyHidden>Trash</VisuallyHidden>
+        </Link>
+      </IconButton>
+    );
+  }
+  return (
+    <IconButton variant="outline" disabled={!trash} asChild>
+      <Link to="/" search={{ ...search, trash: true }}>
+        <TrashIcon />
+        <VisuallyHidden>Trash</VisuallyHidden>
+      </Link>
+    </IconButton>
+  );
+}
+
 function CreateNote() {
   const { pathname } = useLocation();
+  const search = useSearch({ from: Route.fullPath });
   const disabled = pathname === "/notes/create";
   return (
     <IconButton disabled={disabled} asChild>
-      <Link to="/notes/create" search={(x: any) => x}>
+      <Link to="/notes/create" search={search}>
         <PlusIcon />
         <VisuallyHidden>Create new note</VisuallyHidden>
       </Link>
@@ -147,7 +180,7 @@ function NotesList() {
         <Link
           key={note.id}
           from={Route.fullPath}
-          to="/notes/edit/$id"
+          to="/notes/view/$id"
           params={{
             id: note.id,
           }}

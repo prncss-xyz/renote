@@ -14,7 +14,7 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
 /* import ToolbarPlugin from "./plugins/toolBar"; */
-import { Box, Card, Flex } from "@radix-ui/themes";
+import { Box, Button, Card, Flex } from "@radix-ui/themes";
 import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { serialize } from "./encoding";
 import { NavNotes } from "./NavNotes";
@@ -22,31 +22,46 @@ import { NavNotes } from "./NavNotes";
 export function EditorCreate({ id }: { id: string }) {
   const meta = { ...noteZero, id };
   const contents = contentsZero;
-  return <Editor meta={meta} contents={contents} />;
+  return (
+    <Editor meta={meta} contents={contents} editable={true} deleted={false} />
+  );
 }
 
 import "./index.css";
+import { useLocation, useRouter, useSearch } from "@tanstack/react-router";
+import { useCallback } from "react";
+import { useDoubleClick } from "@/hooks/doubleClick";
+import { usePurgeNote, useRestoreNote } from "@/db";
+import { useRemove } from "./remove";
 
 export function Editor({
   meta,
   contents,
+  editable,
+  deleted,
 }: {
   meta: NoteMeta;
   contents: string;
+  editable: boolean;
+  deleted: boolean;
 }) {
+  const edit = useEdit(meta.id, deleted);
+  const handleDoubleClick = useDoubleClick(edit);
   return (
     <LexicalComposer
       key={meta.id}
       initialConfig={{
         ...config,
         editorState: () => serialize(contents),
+        editable,
       }}
     >
       <Flex direction="column" gap="2" overflow="hidden">
-        <NavNotes id={meta.id} />
+        <NavNotes id={meta.id} deleted={deleted} />
+        {deleted && <Deleted id={meta.id} />}
         {/* <ToolbarPlugin /> */}
         <Box overflowY="auto">
-          <Card className="editor">
+          <Card className="editor" onClick={handleDoubleClick}>
             <RichTextPlugin
               contentEditable={<ContentEditable />}
               placeholder={<></>}
@@ -61,6 +76,45 @@ export function Editor({
       <HistoryPlugin />
     </LexicalComposer>
   );
+}
+
+function Restore({ id }: { id: string }) {
+  const { mutate } = useRestoreNote();
+  const onClick = useRemove(id, mutate);
+  return <Button onClick={onClick}>Restore</Button>;
+}
+
+function Purge({ id }: { id: string }) {
+  const { mutate } = usePurgeNote();
+  const onClick = useRemove(id, mutate);
+  return <Button onClick={onClick}>Purge</Button>;
+}
+
+function Deleted({ id }: { id: string }) {
+  return (
+    <Flex direction="row" align="baseline" justify="between" gap="2">
+      <Box>This note has been deleted.</Box>
+      <Flex gap="1">
+        <Restore id={id} />
+        <Purge id={id} />
+      </Flex>
+    </Flex>
+  );
+}
+
+function useEdit(id: string, deleted: boolean) {
+  const { pathname } = useLocation();
+  const disabled = pathname.startsWith("/notes/edit");
+  const { navigate } = useRouter();
+  const search = useSearch({ from: "/notes" });
+  return useCallback(() => {
+    if (disabled || deleted) return;
+    navigate({
+      to: "/notes/edit/$id",
+      params: { id },
+      search,
+    });
+  }, [disabled, deleted, navigate, id, search]);
 }
 
 function onError(error: unknown) {

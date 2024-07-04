@@ -17,11 +17,21 @@ export function validateSortBy(sortBy: unknown): SortByOpts {
 export type SelectNotesOpts = {
   asc: boolean;
   sortBy: SortByOpts;
+  trash: boolean;
 };
 
-export const selectNotesOptsZero = {
+export const selectNotesOptsZero: SelectNotesOpts = {
   asc: false,
   sortBy: sortByZero,
+  trash: false,
+};
+
+export interface ExpendNotesOpts {
+  trash: boolean;
+}
+
+const expendNotesOptsZero: ExpendNotesOpts = {
+  trash: false,
 };
 
 function btimeSort(a: NoteMeta, b: NoteMeta) {
@@ -52,20 +62,35 @@ function getSortCb(sortBy: SortByOpts) {
   }
 }
 
-export function validateSelectNotesOpts(opts: Record<string, unknown>) {
+export function validateSelectNotesOpts(
+  opts: Record<string, unknown>,
+): SelectNotesOpts {
   return {
     asc: Boolean(opts.asc),
     sortBy: validateSortBy(opts.sortBy),
+    trash: Boolean(opts.trash),
   };
 }
 
-export function selectNotes({ asc, sortBy }: SelectNotesOpts) {
+export function selectNotes({ asc, sortBy, trash }: SelectNotesOpts) {
   return function (notes: NoteMeta[]) {
-    notes = notes.filter((note) => note.btime);
+    notes = notes.filter((note) => note.btime && note.trash === trash);
     const sgn = asc ? 1 : -1;
     const cb = getSortCb(sortBy);
     notes.sort((a, b) => sgn * cb(a, b));
     return notes;
+  };
+}
+
+export function expendNotes(_opts: SelectNotesOpts) {
+  return function (notes: NoteMeta[]) {
+    const res: ExpendNotesOpts = expendNotesOptsZero;
+    for (const note of notes) {
+      if (note.trash === true) {
+        res.trash = true;
+      }
+    }
+    return res;
   };
 }
 

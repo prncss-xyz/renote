@@ -1,22 +1,26 @@
-interface Id {
+export interface MetaCore {
   id: string;
+  mtime: number; // last modification of note
 }
 
-export interface NoteMeta extends Id {
+export interface MetaPayload {
   // btime <= mtime <= ttime
   btime: number; // creation of note;
-  mtime: number; // last modification of note
   ttime: number; // last modification of contents
+  trash: boolean; // wether not is in trash
   title: string;
 }
 
-export type NoteMetaUpdate = Partial<NoteMeta> & Id;
+export type NoteMeta = MetaPayload & MetaCore;
+
+export type MetaUpdate = Partial<MetaPayload> & MetaCore;
 
 export const noteZero: NoteMeta = {
   id: "",
-  btime: 0,
   mtime: 0,
+  btime: 0,
   ttime: 0,
+  trash: false,
   title: "",
 };
 

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { Flex } from "@radix-ui/themes";
 
 export const Route = createFileRoute("/notes/empty")({
@@ -6,5 +6,12 @@ export const Route = createFileRoute("/notes/empty")({
 });
 
 function Component() {
-  return <Flex px="1">This collection is currently empty. Please create a new note.</Flex>;
+  const { trash } = useSearch({ from: Route.fullPath });
+  return (
+    <Flex px="1">
+      {trash
+        ? "There is nothing here."
+        : "There is nothign here. Go create a new note."}
+    </Flex>
+  );
 }

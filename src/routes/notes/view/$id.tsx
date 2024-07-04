@@ -1,14 +1,16 @@
-import { Navigate, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ensureNoteContents,
   ensureNotesMeta,
   useNoteContents,
   useNoteMeta,
 } from "@/db/index";
+import { Box } from "@radix-ui/themes";
 import { useState } from "react";
 import { Editor } from "../-editor";
+import { NoteMeta } from "@/core/models";
 
-export const Route = createFileRoute("/notes/edit/$id")({
+export const Route = createFileRoute("/notes/view/$id")({
   component: Component,
   loader: ({ params: { id }, context: { queryClient } }) =>
     Promise.all([
@@ -30,8 +32,25 @@ export function Note({ id }: { id: string }) {
   // which is currently not hapenning
   const [meta] = useState(useNoteMeta(id).data);
   const [contents] = useState(useNoteContents(id).data);
-  if (!meta?.btime) return <Navigate to={`/notes/edit/${id}`} />;
+  if (!meta?.btime) return <NotFound currentId={id} />;
+  if (meta.trash) return <Deleted meta={meta} contents={contents} />;
   return (
-    <Editor meta={meta} contents={contents} editable={true} deleted={false} />
+    <Editor meta={meta} contents={contents} editable={false} deleted={false} />
+  );
+}
+
+function Deleted({ meta, contents }: { meta: NoteMeta; contents: string }) {
+  return (
+    <>
+      <Editor meta={meta} contents={contents} editable={false} deleted={true} />
+    </>
+  );
+}
+
+function NotFound({ currentId }: { currentId: string }) {
+  return (
+    <Box>
+      The note with id <code>{currentId}</code> was not found.
+    </Box>
   );
 }

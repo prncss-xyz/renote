@@ -1,5 +1,5 @@
 import { NoteMeta } from "@/core/models";
-import { selectNotes, findNext } from "@/core/noteSelection";
+import { selectNotes } from "@/core/noteSelection";
 import { useDeleteNote, useNotesMeta } from "@/db";
 import {
   TrashIcon,
@@ -7,32 +7,73 @@ import {
   DoubleArrowRightIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
+  Pencil1Icon,
 } from "@radix-ui/react-icons";
-import { Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
-import {
-  useRouter,
-  useSearch,
-  Link,
-  useLocation,
-} from "@tanstack/react-router";
-import { useRef, useCallback, useEffect, ReactNode } from "react";
+import { Box, Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
+import { useSearch, Link, useLocation } from "@tanstack/react-router";
+import { ReactNode } from "react";
+import { useRemove } from "./remove";
 
-export function NavNotes({ id }: { id: string }) {
+export function NavNotes({ id, deleted }: { id: string; deleted: boolean }) {
   return (
     <Flex justify="end" gap="1">
+      <Edit id={id} deleted={deleted} />
       <First id={id} />
       <Previous id={id} />
       <Next id={id} />
       <Last id={id} />
-      <DeleteNote id={id} />
+      <DeleteNote id={id} deleted={deleted} />
     </Flex>
   );
 }
 
-function DeleteNote({ id }: { id: string }) {
-  const onClick = useDelete(id);
+function Edit({ id, deleted }: { id: string; deleted: boolean }) {
+  const { pathname } = useLocation();
+  const search = useSearch({ from: "/notes" });
+  const disabled =
+    pathname.startsWith("/notes/edit") || pathname.startsWith("/notes/create");
+  if (deleted)
+    return (
+      <IconButton variant="outline" disabled={true} asChild>
+        <Box>
+          <Pencil1Icon />
+          <VisuallyHidden>Edit</VisuallyHidden>
+        </Box>
+      </IconButton>
+    );
+  if (disabled)
+    return (
+      <IconButton variant="solid" asChild>
+        <Link to="/notes/view/$id" params={{ id: id }} search={search}>
+          <Pencil1Icon />
+          <VisuallyHidden>View</VisuallyHidden>
+        </Link>
+      </IconButton>
+    );
+  return (
+    <IconButton variant="outline" asChild>
+      <Link to="/notes/edit/$id" params={{ id: id }} search={search}>
+        <Pencil1Icon />
+        <VisuallyHidden>Edit</VisuallyHidden>
+      </Link>
+    </IconButton>
+  );
+}
+
+function DeleteNote({ id, deleted }: { id: string; deleted: boolean }) {
+  const { mutate } = useDeleteNote();
+  const onClick = useRemove(id, mutate);
   const { pathname } = useLocation();
   const disabled = pathname === "/notes/create";
+  if (deleted)
+    return (
+      <IconButton variant="outline" disabled={true} asChild>
+        <Box>
+          <TrashIcon />
+          <VisuallyHidden>Delete note</VisuallyHidden>
+        </Box>
+      </IconButton>
+    );
   return (
     <IconButton variant="outline" onClick={onClick} disabled={disabled}>
       <TrashIcon />
@@ -41,42 +82,8 @@ function DeleteNote({ id }: { id: string }) {
   );
 }
 
-// TODO: we need a global state to make note disappear from noteList before deletion
-
-// When we want to delete a note, we must first unmount the note's route
-// in order to avoid a "note has been deleted" message
-function useDelete(id: string) {
-  const { mutate: deleteNote } = useDeleteNote();
-  const shouldDelete = useRef(false);
-  const { navigate } = useRouter();
-  const search = useSearch({ strict: false });
-  const notes = useNotesMeta(selectNotes(search as any)).data;
-  const onClick = useCallback(() => {
-    const id_ = findNext(notes, id);
-    if (id_)
-      navigate({
-        to: "/notes/edit/$id",
-        params: { id: id_ },
-        search: (x: any) => x,
-      });
-    else
-      navigate({
-        to: "/notes/create",
-        search: (x: any) => x,
-      });
-    shouldDelete.current = true;
-  }, [navigate, id, notes]);
-  useEffect(() => {
-    return () => {
-      if (!shouldDelete.current) return;
-      deleteNote(id);
-    };
-  }, [shouldDelete, id]);
-  return onClick;
-}
-
 function useNotes() {
-  const search = useSearch({ strict: false }) as any;
+  const search = useSearch({ from: "/notes" });
   return useNotesMeta(selectNotes(search)).data;
 }
 
@@ -90,6 +97,7 @@ function SelectNote({
   children: ReactNode;
 }) {
   const target = select(useNotes());
+  const search = useSearch({ from: "/notes" });
   const disabled = !target || target?.id === id;
   if (disabled)
     return (
@@ -99,11 +107,7 @@ function SelectNote({
     );
   return (
     <IconButton variant="outline" asChild>
-      <Link
-        to="/notes/edit/$id"
-        params={{ id: target.id }}
-        search={(x: any) => x}
-      >
+      <Link to="/notes/edit/$id" params={{ id: target.id }} search={search}>
         {children}
       </Link>
     </IconButton>

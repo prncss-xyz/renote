@@ -1,4 +1,4 @@
-import { NoteMeta, noteZero } from "@/core/models";
+import { MetaPayload, MetaUpdate, NoteMeta, noteZero } from "@/core/models";
 import {
   QueryClient,
   queryOptions,
@@ -20,23 +20,23 @@ async function getNotesMeta(): Promise<NoteMeta[]> {
   return await db.getAll("metadata");
 }
 
-const getNotesOpts = queryOptions({
+const getNotesMetaOpts = queryOptions({
   queryKey: ["notes", "metadata"],
   queryFn: getNotesMeta,
 });
 
 export function fetchNotesMeta(queryClient: QueryClient) {
-  return queryClient.fetchQuery(getNotesOpts);
+  return queryClient.fetchQuery(getNotesMetaOpts);
 }
 
 export function ensureNotesMeta(queryClient: QueryClient) {
-  return queryClient.ensureQueryData(getNotesOpts);
+  return queryClient.ensureQueryData(getNotesMetaOpts);
 }
 
 export async function fetchNote(queryClient: QueryClient, id: string) {
   const [meta, contents] = await Promise.all([
     queryClient
-      .fetchQuery(getNotesOpts)
+      .fetchQuery(getNotesMetaOpts)
       .then((arr) => arr.find((note) => note.id === id)),
     queryClient.fetchQuery(getNoteContentsOpts(id)),
   ]);
@@ -44,8 +44,10 @@ export async function fetchNote(queryClient: QueryClient, id: string) {
 }
 
 export function useNoteMeta(id: string) {
-  // PERF: should stop searching when we find the first match
-  const notesMeta = useNotesMeta((arr) => arr.filter((m) => m.id === id)).data;
+  const notesMeta = useNotesMeta((arr) => {
+    const meta = arr.find((m) => m.id === id);
+    return meta ? [meta] : [];
+  }).data;
   const data = notesMeta[0];
   if (!data) throw new Error(`Note ${id} not found`);
   return { data };
@@ -55,7 +57,7 @@ export function useNotesMeta(
   select?: ((data: NoteMeta[]) => NoteMeta[]) | undefined,
 ) {
   return useSuspenseQuery({
-    ...getNotesOpts,
+    ...getNotesMetaOpts,
     select,
   });
 }
@@ -82,26 +84,74 @@ export function useClearNotes() {
   });
 }
 
-async function upsertDbNote(meta: NoteMeta, contents: string) {
+async function upsertDbNoteMeta(meta: MetaUpdate) {
+  // PERF: reading this all the time is really bad
   const db = await dbPromise;
+  const old = (await db.get("metadata", meta.id)) ?? {
+    ...noteZero,
+    btime: meta.mtime,
+  };
+  const tx = db.transaction(["metadata"], "readwrite");
+  tx.objectStore("metadata").put({ ...old, ...meta });
+  await tx.done;
+}
+
+async function upsertDbNote(meta: MetaUpdate, contents: string) {
+  // PERF: reading this all the time is really bad
+  const db = await dbPromise;
+  const old = (await db.get("metadata", meta.id)) ?? {
+    ...noteZero,
+    btime: meta.mtime,
+  };
   const tx = db.transaction(["metadata", "contents"], "readwrite");
-  tx.objectStore("metadata").put(meta);
+  tx.objectStore("metadata").put({ ...old, ...meta });
   tx.objectStore("contents").put(contents, meta.id);
   await tx.done;
 }
 
-function upsertCacheMeta(arr: NoteMeta[], meta: NoteMeta) {
+function upsertCacheMeta(arr: NoteMeta[], meta: MetaUpdate) {
   const index = arr.findIndex((m) => m.id === meta.id);
   if (index === -1) {
-    return [...arr, meta];
+    return [...arr, { ...noteZero, btime: meta.mtime, ...meta }];
   }
-  return arr.with(index, meta);
+  return arr.with(index, { ...arr[index], ...meta });
+}
+
+export function useUpsertNoteMeta() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (meta: MetaUpdate) => upsertDbNoteMeta(meta),
+    onMutate: async (meta) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
+      ]);
+      queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
+        upsertCacheMeta(old, meta),
+      );
+    },
+  });
+}
+
+export function useUpsertNoteMetaValue(meta: Partial<MetaPayload>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, mtime }: MetaUpdate) =>
+      upsertDbNoteMeta({ ...meta, id, mtime }),
+    onMutate: async ({ id, mtime }) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
+      ]);
+      queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
+        upsertCacheMeta(old, { ...meta, id, mtime }),
+      );
+    },
+  });
 }
 
 export function useUpsertNote() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ meta, contents }: { meta: NoteMeta; contents: string }) =>
+    mutationFn: ({ meta, contents }: { meta: MetaUpdate; contents: string }) =>
       upsertDbNote(meta, contents),
     onMutate: async ({ meta, contents }) => {
       await Promise.all([
@@ -136,23 +186,33 @@ export function useNoteContents(id: string) {
   return useSuspenseQuery(getNoteContentsOpts(id));
 }
 
-async function deleteNote(id: string, now: number) {
-  const db = await dbPromise;
-  await db.put("metadata", { ...noteZero, id, mtime: now });
-  await db.delete("contents", id);
+export function useDeleteNote() {
+  return useUpsertNoteMetaValue({ trash: true });
 }
 
-export function useDeleteNote() {
+export function useRestoreNote() {
+  return useUpsertNoteMetaValue({ trash: false });
+}
+
+async function purgeNote({ id, mtime }: { id: string; mtime: number }) {
+  const db = await dbPromise;
+  const tx = db.transaction(["metadata", "contents"], "readwrite");
+  tx.objectStore("metadata").put({ ...noteZero, id, mtime: mtime });
+  tx.objectStore("contents").delete(id);
+  await tx.done;
+}
+
+export function usePurgeNote() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => deleteNote(id, Date.now()),
-    onMutate: async (id) => {
+    mutationFn: (arg: { id: string; mtime: number }) => purgeNote(arg),
+    onMutate: async ({ id, mtime }) => {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
         queryClient.cancelQueries({ queryKey: ["notes", "contents", id] }),
       ]);
       queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
-        upsertCacheMeta(old, { ...noteZero, id, mtime: Date.now() }),
+        upsertCacheMeta(old, { ...noteZero, id, mtime }),
       );
     },
   });

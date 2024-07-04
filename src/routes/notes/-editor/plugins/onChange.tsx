@@ -1,13 +1,15 @@
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useCallback, useEffect } from "react";
-import { NoteMeta } from "@/core/models";
+import { MetaUpdate, NoteMeta } from "@/core/models";
 import { useFlushedDebounced } from "@/utils/deduper";
 import { useUpsertNote } from "@/db";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate, useSearch } from "@tanstack/react-router";
 import { deserialize } from "../encoding";
-import { pushSync } from "@/api";
 
-function fold<T>(node: any, acc: T, cb: (acc: T, node: any) => T) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Node = any;
+
+function fold<T>(node: Node, acc: T, cb: (acc: T, node: Node) => T) {
   if (!node) return acc;
   acc = cb(acc, node);
   for (const child of node.children ?? []) {
@@ -16,19 +18,19 @@ function fold<T>(node: any, acc: T, cb: (acc: T, node: any) => T) {
   return acc;
 }
 
-function find(node: any, cb: (node: any) => unknown) {
+function find(node: Node, cb: (node: Node) => unknown) {
   if (cb(node)) return node;
   for (const child of node.children ?? []) {
     if (find(child, cb)) return child;
   }
 }
 
-function toText(node: any) {
+function toText(node: Node) {
   return fold(node, "", (acc, node) => (node.text ? acc + node.text : ""));
 }
 
 interface Data {
-  meta: NoteMeta;
+  meta: MetaUpdate;
   contents: string;
   pathname: string;
 }
@@ -44,9 +46,9 @@ export function OnChangePlugin({
   const { mutate } = useUpsertNote();
   const navigate = useNavigate();
   const pathname = useLocation({ select: ({ pathname }) => pathname });
+  const search = useSearch({ from: "/notes" });
   const localCommit = useCallback(
     ({ meta, contents, pathname }: Data) => {
-      if (pathname !== "/notes/create") pushSync({ meta, contents });
       mutate(
         { meta, contents },
         {
@@ -57,13 +59,13 @@ export function OnChangePlugin({
                 params: {
                   id: meta.id,
                 },
-                search: (x: any) => x,
+                search,
               });
           },
         },
       );
     },
-    [pathname, navigate],
+    [mutate, navigate, search],
   );
   const update = useFlushedDebounced(500, (data: Data) => localCommit(data));
   useEffect(() => {
@@ -72,12 +74,12 @@ export function OnChangePlugin({
         const now = Date.now();
         const newContents = deserialize();
         if (newContents === contents) return;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         contents = newContents;
         const serizalizedState = editorState.toJSON();
         update({
           meta: {
-            ...meta,
-            btime: meta.btime || now,
+            id: meta.id,
             mtime: now,
             ttime: now,
             title: toText(

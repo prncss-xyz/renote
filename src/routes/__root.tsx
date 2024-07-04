@@ -48,7 +48,9 @@ function Component() {
         <Notes />
         <Settings />
       </TabNav.Root>
-      <Outlet />
+      <Flex px="2">
+        <Outlet />
+      </Flex>
       <TanStackRouterDevtools />
       <ReactQueryDevtools initialIsOpen={false} />
       {showThemePanel && <ThemePanel />}
