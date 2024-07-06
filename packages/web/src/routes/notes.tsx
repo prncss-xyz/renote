@@ -5,7 +5,6 @@ import {
   useLocation,
   useNavigate,
 } from "@tanstack/react-router";
-import { useNotesMeta } from "@/db";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -22,14 +21,14 @@ import {
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
-  expendNotes,
-  selectNotes,
   sortByNames,
   validateSelectNotesOpts,
 } from "@/core/noteSelection";
 import "./notes.css";
 import { NoteMeta } from "@/core/models";
 import { Fuzzy } from "./-fuzzy";
+import { ProcessedNotesProvider } from "./notes/-processedNotes/provider";
+import { useProcessedNotes } from "./notes/-processedNotes/hooks";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
@@ -38,26 +37,29 @@ export const Route = createFileRoute("/notes")({
 });
 
 export function Component() {
+  const search = useSearch({ from: Route.fullPath });
   return (
-    <Flex direction="row" gap="3" flexGrow="1">
-      <Flex direction="column" width="250px" gap="2">
-        <Flex direction="row" gap="1">
-          <Fuzzy />
-          <Trash />
-          <CreateNote />
-        </Flex>
-        <Flex direction="row" gap="1" justify="between" align="center">
-          <SortBy />
-          <Dir />
+    <ProcessedNotesProvider search={search}>
+      <Flex direction="row" gap="3" flexGrow="1">
+        <Flex direction="column" width="250px" gap="2">
+          <Flex direction="row" gap="1">
+            <Fuzzy />
+            <Trash />
+            <CreateNote />
+          </Flex>
+          <Flex direction="row" gap="1" justify="between" align="center">
+            <SortBy />
+            <Dir />
+          </Flex>
+          <Flex direction="column" flexGrow="1">
+            <NotesList />
+          </Flex>
         </Flex>
         <Flex direction="column" flexGrow="1">
-          <NotesList />
+          <Outlet />
         </Flex>
       </Flex>
-      <Flex direction="column" flexGrow="1">
-        <Outlet />
-      </Flex>
-    </Flex>
+    </ProcessedNotesProvider>
   );
 }
 
@@ -106,9 +108,8 @@ function Dir() {
 
 function Trash() {
   const search = useSearch({ from: Route.fullPath });
-  const notesMeta = useNotesMeta().data;
   // FIX: this value is not reactive
-  const { trash } = expendNotes(search)(notesMeta);
+  const trash = useProcessedNotes(({ expend }) => expend.trash);
   if (search.trash) {
     return (
       <Tooltip content="Leave trash bin">
@@ -185,7 +186,7 @@ function Note({ note }: { note: NoteMeta }) {
 
 function NotesList() {
   const search = useSearch({ from: Route.fullPath });
-  const notes = useNotesMeta(selectNotes(search)).data;
+  const notes = useProcessedNotes(({ notes }) => notes);
   return (
     <Flex flexGrow="1" direction="column" overflowY="auto">
       {notes.map((note) => (

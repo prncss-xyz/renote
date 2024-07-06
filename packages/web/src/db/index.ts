@@ -125,9 +125,9 @@ export function useUpsertNoteMeta() {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),
       ]);
-      queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) =>
-        upsertCacheMeta(old, meta),
-      );
+      queryClient.setQueryData(["notes", "metadata"], (old: NoteMeta[]) => {
+        return upsertCacheMeta(old, meta);
+      });
     },
   });
 }

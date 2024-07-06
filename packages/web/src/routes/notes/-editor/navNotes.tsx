@@ -1,6 +1,5 @@
 import { NoteMeta } from "@/core/models";
-import { selectNotes } from "@/core/noteSelection";
-import { useDeleteNote, useNotesMeta } from "@/db";
+import { useDeleteNote } from "@/db";
 import {
   TrashIcon,
   DoubleArrowLeftIcon,
@@ -19,6 +18,7 @@ import {
 import { useSearch, Link, useLocation } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { useRemove } from "./remove";
+import { useProcessedNotes } from "../-processedNotes/hooks";
 
 export function NavNotes({ id, deleted }: { id: string; deleted: boolean }) {
   return (
@@ -96,11 +96,6 @@ function DeleteNote({ id, deleted }: { id: string; deleted: boolean }) {
   );
 }
 
-function useNotes() {
-  const search = useSearch({ from: "/notes" });
-  return useNotesMeta(selectNotes(search)).data;
-}
-
 function SelectNote({
   id,
   select,
@@ -110,7 +105,7 @@ function SelectNote({
   select: (notes: NoteMeta[]) => NoteMeta | undefined;
   children: ReactNode;
 }) {
-  const target = select(useNotes());
+  const target = useProcessedNotes((state) => select(state.notes));
   const search = useSearch({ from: "/notes" });
   const disabled = !target || target?.id === id;
   if (disabled)

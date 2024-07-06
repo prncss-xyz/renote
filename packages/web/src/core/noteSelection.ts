@@ -72,26 +72,28 @@ export function validateSelectNotesOpts(
   };
 }
 
-export function selectNotes({ asc, sortBy, trash }: SelectNotesOpts) {
-  return function (notes: NoteMeta[]) {
-    notes = notes.filter((note) => note.btime && note.trash === trash);
-    const sgn = asc ? 1 : -1;
-    const cb = getSortCb(sortBy);
-    notes.sort((a, b) => sgn * cb(a, b));
-    return notes;
-  };
+export function isSearchable(note: NoteMeta) {
+  return note.btime && !note.trash && note.title.length > 0;
 }
 
-export function expendNotes(_opts: SelectNotesOpts) {
-  return function (notes: NoteMeta[]) {
-    const res: ExpendNotesOpts = expendNotesOptsZero;
-    for (const note of notes) {
-      if (note.trash === true) {
-        res.trash = true;
-      }
+export function processNotes(
+  { asc, sortBy, trash }: SelectNotesOpts,
+  notes: NoteMeta[],
+) {
+  const expend: ExpendNotesOpts = expendNotesOptsZero;
+  const filteredNotes: NoteMeta[] = [];
+  for (const note of notes) {
+    if (!note.btime) continue;
+    if (note.trash === true) {
+      expend.trash = true;
     }
-    return res;
-  };
+    if (note.trash !== trash) continue;
+    filteredNotes.push(note);
+  }
+  const sgn = asc ? 1 : -1;
+  const cb = getSortCb(sortBy);
+  filteredNotes.sort((a, b) => sgn * cb(a, b));
+  return { expend, notes: filteredNotes };
 }
 
 export function findNext(notes: NoteMeta[], id: string) {

@@ -1,7 +1,7 @@
-import { selectNotes, findNext } from "@/core/noteSelection";
-import { useNotesMeta } from "@/db";
+import { findNext } from "@/core/noteSelection";
 import { useRouter, useSearch } from "@tanstack/react-router";
 import { useRef, useCallback, useEffect } from "react";
+import { useProcessedNotes } from "../-processedNotes/hooks";
 
 // TODO: we need a global state to make note disappear from noteList before deletion
 
@@ -14,7 +14,7 @@ export function useRemove(
   const shouldDelete = useRef(false);
   const { navigate } = useRouter();
   const search = useSearch({ from: "/notes" });
-  const notes = useNotesMeta(selectNotes(search)).data;
+  const notes = useProcessedNotes((state) => state.notes);
   const onClick = useCallback(() => {
     const id_ = findNext(notes, id);
     if (id_)

@@ -9,7 +9,7 @@ import { useNotesMeta } from "@/db";
 import fuzzysort from "fuzzysort";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Link, useRouter } from "@tanstack/react-router";
-import { selectNotes, selectNotesOptsZero } from "@/core/noteSelection";
+import { isSearchable, selectNotesOptsZero } from "@/core/noteSelection";
 import { useMemo, useState } from "react";
 import { useHotkey } from "@/hooks/hotkey";
 
@@ -17,7 +17,7 @@ const highlightClass = "fuzzy__highlight";
 
 function Selector({ close }: { close: () => void }) {
   const { navigate } = useRouter();
-  const notes = useNotesMeta(selectNotes(selectNotesOptsZero)).data;
+  const notes = useNotesMeta((notes) => notes.filter(isSearchable)).data;
   const [query, setQuery] = useState("");
   const choices = useMemo(
     () =>
