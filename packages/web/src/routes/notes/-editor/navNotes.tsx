@@ -9,7 +9,13 @@ import {
   ArrowRightIcon,
   Pencil1Icon,
 } from "@radix-ui/react-icons";
-import { Box, Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Tooltip,
+  VisuallyHidden,
+} from "@radix-ui/themes";
 import { useSearch, Link, useLocation } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { useRemove } from "./remove";
@@ -34,29 +40,35 @@ function Edit({ id, deleted }: { id: string; deleted: boolean }) {
     pathname.startsWith("/notes/edit") || pathname.startsWith("/notes/create");
   if (deleted)
     return (
-      <IconButton variant="outline" disabled={true} asChild>
-        <Box>
-          <Pencil1Icon />
-          <VisuallyHidden>Edit</VisuallyHidden>
-        </Box>
-      </IconButton>
+      <Tooltip content="Edit note">
+        <IconButton variant="outline" disabled={true} asChild>
+          <Box>
+            <Pencil1Icon />
+            <VisuallyHidden>Edit note</VisuallyHidden>
+          </Box>
+        </IconButton>
+      </Tooltip>
     );
   if (disabled)
     return (
-      <IconButton variant="solid" asChild>
-        <Link to="/notes/view/$id" params={{ id: id }} search={search}>
-          <Pencil1Icon />
-          <VisuallyHidden>View</VisuallyHidden>
-        </Link>
-      </IconButton>
+      <Tooltip content="View note">
+        <IconButton variant="solid" asChild>
+          <Link to="/notes/view/$id" params={{ id: id }} search={search}>
+            <Pencil1Icon />
+            <VisuallyHidden>View note</VisuallyHidden>
+          </Link>
+        </IconButton>
+      </Tooltip>
     );
   return (
-    <IconButton variant="outline" asChild>
-      <Link to="/notes/edit/$id" params={{ id: id }} search={search}>
-        <Pencil1Icon />
-        <VisuallyHidden>Edit</VisuallyHidden>
-      </Link>
-    </IconButton>
+    <Tooltip content="Edit note">
+      <IconButton variant="outline" asChild>
+        <Link to="/notes/edit/$id" params={{ id: id }} search={search}>
+          <Pencil1Icon />
+          <VisuallyHidden>Edit</VisuallyHidden>
+        </Link>
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -75,10 +87,12 @@ function DeleteNote({ id, deleted }: { id: string; deleted: boolean }) {
       </IconButton>
     );
   return (
-    <IconButton variant="outline" onClick={onClick} disabled={disabled}>
-      <TrashIcon />
-      <VisuallyHidden>Delete note</VisuallyHidden>
-    </IconButton>
+    <Tooltip content="Delete note">
+      <IconButton variant="outline" onClick={onClick} disabled={disabled}>
+        <TrashIcon />
+        <VisuallyHidden>Delete note</VisuallyHidden>
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -116,23 +130,27 @@ function SelectNote({
 
 function First({ id }: { id: string }) {
   return (
-    <>
-      <SelectNote id={id} select={(notes) => notes.at(0)}>
-        {<DoubleArrowLeftIcon />}
-      </SelectNote>
-      <VisuallyHidden>First note</VisuallyHidden>
-    </>
+    <Tooltip content="First note">
+      <Box>
+        <SelectNote id={id} select={(notes) => notes.at(0)}>
+          {<DoubleArrowLeftIcon />}
+        </SelectNote>
+        <VisuallyHidden>First note</VisuallyHidden>
+      </Box>
+    </Tooltip>
   );
 }
 
 function Last({ id }: { id: string }) {
   return (
-    <>
-      <SelectNote id={id} select={(notes) => notes.at(-1)}>
-        {<DoubleArrowRightIcon />}
-      </SelectNote>
-      <VisuallyHidden>Last note</VisuallyHidden>
-    </>
+    <Tooltip content="Last note">
+      <Box>
+        <SelectNote id={id} select={(notes) => notes.at(-1)}>
+          {<DoubleArrowRightIcon />}
+        </SelectNote>
+        <VisuallyHidden>Last note</VisuallyHidden>
+      </Box>
+    </Tooltip>
   );
 }
 
@@ -161,22 +179,26 @@ function next(id: string) {
 
 function Previous({ id }: { id: string }) {
   return (
-    <>
-      <SelectNote id={id} select={previous(id)}>
-        {<ArrowLeftIcon />}
-      </SelectNote>
-      <VisuallyHidden>Previous note</VisuallyHidden>
-    </>
+    <Tooltip content="Previous note">
+      <Box>
+        <SelectNote id={id} select={previous(id)}>
+          {<ArrowLeftIcon />}
+        </SelectNote>
+        <VisuallyHidden>Previous note</VisuallyHidden>
+      </Box>
+    </Tooltip>
   );
 }
 
 function Next({ id }: { id: string }) {
   return (
-    <>
-      <SelectNote id={id} select={next(id)}>
-        {<ArrowRightIcon />}
-      </SelectNote>
-      <VisuallyHidden>Next note</VisuallyHidden>
-    </>
+    <Tooltip content="Next note">
+      <Box>
+        <SelectNote id={id} select={next(id)}>
+          {<ArrowRightIcon />}
+        </SelectNote>
+        <VisuallyHidden>Next note</VisuallyHidden>
+      </Box>
+    </Tooltip>
   );
 }

@@ -12,7 +12,13 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
-import { Flex, IconButton, Select, VisuallyHidden } from "@radix-ui/themes";
+import {
+  Flex,
+  IconButton,
+  Select,
+  Tooltip,
+  VisuallyHidden,
+} from "@radix-ui/themes";
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
@@ -105,21 +111,25 @@ function Trash() {
   const { trash } = expendNotes(search)(notesMeta);
   if (search.trash) {
     return (
-      <IconButton variant="solid" asChild>
-        <Link to="/" search={{ ...search, trash: false }}>
-          <TrashIcon />
-          <VisuallyHidden>Trash</VisuallyHidden>
-        </Link>
-      </IconButton>
+      <Tooltip content="Leave trash bin">
+        <IconButton variant="solid" asChild>
+          <Link to="/" search={{ ...search, trash: false }}>
+            <TrashIcon />
+            <VisuallyHidden>Leave trash bin</VisuallyHidden>
+          </Link>
+        </IconButton>
+      </Tooltip>
     );
   }
   return (
-    <IconButton variant="outline" disabled={!trash} asChild>
-      <Link to="/" search={{ ...search, trash: true }}>
-        <TrashIcon />
-        <VisuallyHidden>Trash</VisuallyHidden>
-      </Link>
-    </IconButton>
+    <Tooltip content="Visit trash bin">
+      <IconButton variant="outline" disabled={!trash} asChild>
+        <Link to="/" search={{ ...search, trash: true }}>
+          <TrashIcon />
+          <VisuallyHidden>Visit trash bin</VisuallyHidden>
+        </Link>
+      </IconButton>
+    </Tooltip>
   );
 }
 
@@ -128,12 +138,14 @@ function CreateNote() {
   const search = useSearch({ from: Route.fullPath });
   const disabled = pathname === "/notes/create";
   return (
-    <IconButton disabled={disabled} asChild>
-      <Link to="/notes/create" search={search}>
-        <PlusIcon />
-        <VisuallyHidden>Create new note</VisuallyHidden>
-      </Link>
-    </IconButton>
+    <Tooltip content="Create note">
+      <IconButton disabled={disabled} asChild>
+        <Link to="/notes/create" search={search}>
+          <PlusIcon />
+          <VisuallyHidden>Create note</VisuallyHidden>
+        </Link>
+      </IconButton>
+    </Tooltip>
   );
 }
 

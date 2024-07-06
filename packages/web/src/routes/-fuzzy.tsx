@@ -1,4 +1,10 @@
-import { Dialog, Flex, IconButton, VisuallyHidden } from "@radix-ui/themes";
+import {
+  Dialog,
+  Flex,
+  IconButton,
+  Tooltip,
+  VisuallyHidden,
+} from "@radix-ui/themes";
 import { useNotesMeta } from "@/db";
 import fuzzysort from "fuzzysort";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
@@ -66,12 +72,14 @@ export function Fuzzy() {
   useHotkey({ key: "k", ctrl: true }, () => setOpen(true));
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger>
-        <IconButton>
-          <MagnifyingGlassIcon />
-          <VisuallyHidden>Fuzzy search title</VisuallyHidden>
-        </IconButton>
-      </Dialog.Trigger>
+      <Tooltip content="[ctrl+k] Fuzzy search title">
+        <Dialog.Trigger>
+          <IconButton>
+            <MagnifyingGlassIcon />
+            <VisuallyHidden>Fuzzy search title</VisuallyHidden>
+          </IconButton>
+        </Dialog.Trigger>
+      </Tooltip>
       <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
         <Flex direction="row" justify="between" gap="1">
           <Dialog.Title>Fuzzy search title</Dialog.Title>

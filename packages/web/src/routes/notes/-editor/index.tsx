@@ -17,7 +17,7 @@ import { CodeNode } from "@lexical/code";
 import { Box, Button, Card, Flex } from "@radix-ui/themes";
 import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { serialize } from "./encoding";
-import { NavNotes } from "./NavNotes";
+import { NavNotes } from "./navNotes";
 
 export function EditorCreate({ id }: { id: string }) {
   const meta = { ...noteZero, id };
