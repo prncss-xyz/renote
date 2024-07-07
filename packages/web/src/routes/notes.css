@@ -15,10 +15,6 @@
   }
 }
 
-.fuzzy__input {
-  outline: none;
-}
-
 .fuzzy__item {
   text-decoration: none;
   color: var(--gray-11);

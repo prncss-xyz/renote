@@ -1,4 +1,5 @@
 import { NoteMeta } from "./models";
+import { z } from "zod";
 
 export const sortByNames = {
   title: "Title",
@@ -7,31 +8,35 @@ export const sortByNames = {
 };
 
 export type SortByOpts = keyof typeof sortByNames;
-
 const sortByZero: SortByOpts = "title";
-
-export function validateSortBy(sortBy: unknown): SortByOpts {
-  return String(sortBy) in sortByNames ? (sortBy as SortByOpts) : sortByZero;
+function validateSortBy(sortBy: unknown) {
+  return typeof sortBy === "string" ? sortBy in sortByNames : false;
 }
 
-export type SelectNotesOpts = {
-  asc: boolean;
-  sortBy: SortByOpts;
-  trash: boolean;
-};
+export const selectNotesOptsSchema = z.object({
+  asc: z.boolean().catch(false),
+  sortBy: z.custom<SortByOpts>(validateSortBy).catch(sortByZero),
+  trash: z.boolean().catch(false),
+  tags: z.union([z.array(z.string()), z.literal("untagged")]).catch([]),
+});
+
+export type SelectNotesOpts = z.infer<typeof selectNotesOptsSchema>;
 
 export const selectNotesOptsZero: SelectNotesOpts = {
   asc: false,
   sortBy: sortByZero,
   trash: false,
+  tags: [],
 };
 
 export interface ExpendNotesOpts {
   trash: boolean;
+  tags: string[];
 }
 
 const expendNotesOptsZero: ExpendNotesOpts = {
   trash: false,
+  tags: [],
 };
 
 function btimeSort(a: NoteMeta, b: NoteMeta) {
@@ -62,38 +67,45 @@ function getSortCb(sortBy: SortByOpts) {
   }
 }
 
-export function validateSelectNotesOpts(
-  opts: Record<string, unknown>,
-): SelectNotesOpts {
-  return {
-    asc: Boolean(opts.asc),
-    sortBy: validateSortBy(opts.sortBy),
-    trash: Boolean(opts.trash),
-  };
-}
-
 export function isSearchable(note: NoteMeta) {
   return note.btime && !note.trash && note.title.length > 0;
 }
 
-export function processNotes(
-  { asc, sortBy, trash }: SelectNotesOpts,
-  notes: NoteMeta[],
-) {
+function intersects<T>(a: T[], b: T[]) {
+  return a.some((x) => b.includes(x));
+}
+
+export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
+  const allTags = new Set<string>();
+  let unTagged = false;
   const expend: ExpendNotesOpts = expendNotesOptsZero;
   const filteredNotes: NoteMeta[] = [];
   for (const note of notes) {
     if (!note.btime) continue;
+    if (note.tags.length) note.tags.forEach((tag) => allTags.add(tag));
+    else unTagged = true;
     if (note.trash === true) {
       expend.trash = true;
     }
-    if (note.trash !== trash) continue;
+    if (note.trash !== search.trash) continue;
+    expend.tags.push(...note.tags);
+    if (search.tags === "untagged") {
+      if (!search.tags.length) continue;
+    } else {
+      if (search.tags.length && !intersects(note.tags, search.tags)) continue;
+    }
     filteredNotes.push(note);
   }
-  const sgn = asc ? 1 : -1;
-  const cb = getSortCb(sortBy);
+  const sgn = search.asc ? 1 : -1;
+  const cb = getSortCb(search.sortBy);
   filteredNotes.sort((a, b) => sgn * cb(a, b));
-  return { expend, notes: filteredNotes };
+  // TDDO: use collator
+  return {
+    expend,
+    notes: filteredNotes,
+    allTags: Array.from(allTags).sort(),
+    unTagged,
+  };
 }
 
 export function findNext(notes: NoteMeta[], id: string) {

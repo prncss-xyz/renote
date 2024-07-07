@@ -135,8 +135,7 @@ export function useUpsertNoteMeta() {
 export function useUpsertNoteMetaValue(meta: Partial<MetaPayload>) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, mtime }: MetaUpdate) =>
-      upsertDbNoteMeta({ ...meta, id, mtime }),
+    mutationFn: ({ id, mtime }: MetaUpdate) => upsertDbNoteMeta({ ...meta, id, mtime }),
     onMutate: async ({ id, mtime }) => {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),

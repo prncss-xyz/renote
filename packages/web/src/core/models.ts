@@ -9,6 +9,7 @@ export interface MetaPayload {
   ttime: number; // last modification of contents
   trash: boolean; // wether not is in trash
   title: string;
+  tags: string[];
 }
 
 export type NoteMeta = MetaPayload & MetaCore;
@@ -22,6 +23,7 @@ export const noteZero: NoteMeta = {
   ttime: 0,
   trash: false,
   title: "",
+  tags: [],
 };
 
 export const contentsZero = "# ";

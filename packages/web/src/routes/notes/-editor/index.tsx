@@ -33,6 +33,7 @@ import { useCallback } from "react";
 import { useDoubleClick } from "@/hooks/doubleClick";
 import { usePurgeNote, useRestoreNote } from "@/db";
 import { useRemove } from "./remove";
+import { TagBar } from "./tagBar";
 
 export function Editor({
   meta,
@@ -60,6 +61,7 @@ export function Editor({
         <NavNotes id={meta.id} deleted={deleted} />
         {deleted && <Deleted id={meta.id} />}
         {/* <ToolbarPlugin /> */}
+        <TagBar id={meta.id} />
         <Box overflowY="auto">
           <Card className="editor" onClick={handleDoubleClick}>
             <RichTextPlugin

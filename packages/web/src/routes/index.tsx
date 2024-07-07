@@ -1,11 +1,11 @@
-import { validateSelectNotesOpts } from "@/core/noteSelection";
+import { selectNotesOptsSchema } from "@/core/noteSelection";
 import { Navigate, createFileRoute, useSearch } from "@tanstack/react-router";
 import { useProcessedNotes } from "./notes/-processedNotes/hooks";
 import { ProcessedNotesProvider } from "./notes/-processedNotes/provider";
 
 export const Route = createFileRoute("/")({
   component: Component,
-  validateSearch: validateSelectNotesOpts,
+  validateSearch: selectNotesOptsSchema,
 });
 
 function Redirect() {

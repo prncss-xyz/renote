@@ -12,6 +12,7 @@ import {
   TrashIcon,
 } from "@radix-ui/react-icons";
 import {
+  Box,
   Flex,
   IconButton,
   Select,
@@ -21,8 +22,8 @@ import {
 import { Link, useSearch } from "@tanstack/react-router";
 import {
   SortByOpts,
+  selectNotesOptsSchema,
   sortByNames,
-  validateSelectNotesOpts,
 } from "@/core/noteSelection";
 import "./notes.css";
 import { NoteMeta } from "@/core/models";
@@ -33,7 +34,7 @@ import { useProcessedNotes } from "./notes/-processedNotes/hooks";
 export const Route = createFileRoute("/notes")({
   component: Component,
   loader: ({ context: { queryClient } }) => ensureNotesMeta(queryClient),
-  validateSearch: validateSelectNotesOpts,
+  validateSearch: selectNotesOptsSchema,
 });
 
 export function Component() {
@@ -44,7 +45,7 @@ export function Component() {
         <Flex direction="column" width="250px" gap="2">
           <Flex direction="row" gap="1">
             <Fuzzy />
-            <Trash />
+            <VisitTrash />
             <CreateNote />
           </Flex>
           <Flex direction="row" gap="1" justify="between" align="center">
@@ -106,31 +107,35 @@ function Dir() {
   );
 }
 
-function Trash() {
+function VisitTrash() {
   const search = useSearch({ from: Route.fullPath });
   // FIX: this value is not reactive
   const trash = useProcessedNotes(({ expend }) => expend.trash);
   if (search.trash) {
     return (
-      <Tooltip content="Leave trash bin">
-        <IconButton variant="solid" asChild>
-          <Link to="/" search={{ ...search, trash: false }}>
-            <TrashIcon />
-            <VisuallyHidden>Leave trash bin</VisuallyHidden>
-          </Link>
-        </IconButton>
-      </Tooltip>
+      <IconButton variant="solid" asChild>
+        <Link to="/" search={{ ...search, trash: false }}>
+          <Tooltip content="Leave trash bin">
+            <Box>
+              <TrashIcon />
+              <VisuallyHidden>Leave trash bin</VisuallyHidden>
+            </Box>
+          </Tooltip>
+        </Link>
+      </IconButton>
     );
   }
   return (
-    <Tooltip content="Visit trash bin">
-      <IconButton variant="outline" disabled={!trash} asChild>
-        <Link to="/" search={{ ...search, trash: true }}>
-          <TrashIcon />
-          <VisuallyHidden>Visit trash bin</VisuallyHidden>
-        </Link>
-      </IconButton>
-    </Tooltip>
+    <IconButton variant="outline" disabled={!trash} asChild>
+      <Link to="/" search={{ ...search, trash: true }}>
+        <Tooltip content="Visit trash bin">
+          <Box>
+            <TrashIcon />
+            <VisuallyHidden>Visit trash bin</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </Link>
+    </IconButton>
   );
 }
 
@@ -139,14 +144,16 @@ function CreateNote() {
   const search = useSearch({ from: Route.fullPath });
   const disabled = pathname === "/notes/create";
   return (
-    <Tooltip content="Create note">
-      <IconButton disabled={disabled} asChild>
-        <Link to="/notes/create" search={search}>
-          <PlusIcon />
-          <VisuallyHidden>Create note</VisuallyHidden>
-        </Link>
-      </IconButton>
-    </Tooltip>
+    <IconButton disabled={disabled} asChild>
+      <Link to="/notes/create" search={search}>
+        <Tooltip content="Create note">
+          <Box>
+            <PlusIcon />
+            <VisuallyHidden>Create note</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </Link>
+    </IconButton>
   );
 }
 

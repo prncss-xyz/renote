@@ -2,6 +2,7 @@ import {
   Dialog,
   Flex,
   IconButton,
+  TextField,
   Tooltip,
   VisuallyHidden,
 } from "@radix-ui/themes";
@@ -10,12 +11,16 @@ import fuzzysort from "fuzzysort";
 import { Cross2Icon, MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Link, useRouter } from "@tanstack/react-router";
 import { isSearchable, selectNotesOptsZero } from "@/core/noteSelection";
-import { useMemo, useState } from "react";
-import { useHotkey } from "@/hooks/hotkey";
+import { useCallback, useMemo, useState } from "react";
+import { useGlobalHotkey, useHotkeyHandler } from "@/hooks/hotkey";
 
 const highlightClass = "fuzzy__highlight";
 
-function Selector({ close }: { close: () => void }) {
+const localBindings = {
+  confirmFuzzySearch: { key: "Enter" },
+};
+
+function Contents({ close }: { close: () => void }) {
   const { navigate } = useRouter();
   const notes = useNotesMeta((notes) => notes.filter(isSearchable)).data;
   const [query, setQuery] = useState("");
@@ -27,24 +32,31 @@ function Selector({ close }: { close: () => void }) {
       }),
     [query, notes],
   );
+  const { onKeyDown, useRegister } = useHotkeyHandler(localBindings);
+  useRegister(
+    "confirmFuzzySearch",
+    useCallback(() => {
+      close();
+      if (choices[0]) {
+        navigate({
+          to: "/notes/view/$id",
+          params: { id: choices[0].obj.id },
+          search: selectNotesOptsZero,
+        });
+      }
+    }, [choices, close, navigate]),
+  );
   return (
     <Flex direction="column" gap="1">
-      <input
-        className="fuzzy__input"
+      <TextField.Root
         value={query}
-        onKeyDown={(e) => {
-          if (e.key !== "Enter") return;
-          close();
-          if (choices[0]) {
-            navigate({
-              to: "/notes/view/$id",
-              params: { id: choices[0].obj.id },
-              search: selectNotesOptsZero,
-            });
-          }
-        }}
+        onKeyDown={onKeyDown}
         onChange={(e) => setQuery(e.target.value)}
-      />
+      >
+        <TextField.Slot>
+          <MagnifyingGlassIcon />
+        </TextField.Slot>
+      </TextField.Root>
       <Flex direction="column" height="140px" gap="1">
         {choices.map((choice) => (
           <Dialog.Close key={choice.obj.id}>
@@ -67,19 +79,23 @@ function Selector({ close }: { close: () => void }) {
   );
 }
 
+const globalBindings = { openFuzzySearch: { key: "k", ctrl: true } };
+
 export function Fuzzy() {
   const [open, setOpen] = useState(false);
-  useHotkey({ key: "k", ctrl: true }, () => setOpen(true));
+  const close = useCallback(() => setOpen(false), [setOpen]);
+  const { useRegisterGlobal } = useGlobalHotkey(globalBindings);
+  useRegisterGlobal("openFuzzySearch", () => setOpen(true));
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Tooltip content="[ctrl+k] Fuzzy search title">
-        <Dialog.Trigger>
+      <Dialog.Trigger>
+        <Tooltip content="[ctrl+k] Fuzzy search title">
           <IconButton>
             <MagnifyingGlassIcon />
             <VisuallyHidden>Fuzzy search title</VisuallyHidden>
           </IconButton>
-        </Dialog.Trigger>
-      </Tooltip>
+        </Tooltip>
+      </Dialog.Trigger>
       <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
         <Flex direction="row" justify="between" gap="1">
           <Dialog.Title>Fuzzy search title</Dialog.Title>
@@ -90,7 +106,7 @@ export function Fuzzy() {
             </Flex>
           </Dialog.Close>
         </Flex>
-        <Selector close={() => setOpen(false)} />
+        <Contents close={close} />
       </Dialog.Content>
     </Dialog.Root>
   );

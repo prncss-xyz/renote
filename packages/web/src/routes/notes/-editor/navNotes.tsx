@@ -40,35 +40,39 @@ function Edit({ id, deleted }: { id: string; deleted: boolean }) {
     pathname.startsWith("/notes/edit") || pathname.startsWith("/notes/create");
   if (deleted)
     return (
-      <Tooltip content="Edit note">
-        <IconButton variant="outline" disabled={true} asChild>
+      <IconButton variant="outline" disabled={true} asChild>
+        <Tooltip content="Edit note">
           <Box>
             <Pencil1Icon />
             <VisuallyHidden>Edit note</VisuallyHidden>
           </Box>
-        </IconButton>
-      </Tooltip>
+        </Tooltip>
+      </IconButton>
     );
   if (disabled)
     return (
-      <Tooltip content="View note">
-        <IconButton variant="solid" asChild>
-          <Link to="/notes/view/$id" params={{ id: id }} search={search}>
-            <Pencil1Icon />
-            <VisuallyHidden>View note</VisuallyHidden>
-          </Link>
-        </IconButton>
-      </Tooltip>
-    );
-  return (
-    <Tooltip content="Edit note">
-      <IconButton variant="outline" asChild>
-        <Link to="/notes/edit/$id" params={{ id: id }} search={search}>
-          <Pencil1Icon />
-          <VisuallyHidden>Edit</VisuallyHidden>
+      <IconButton variant="solid" asChild>
+        <Link to="/notes/view/$id" params={{ id: id }} search={search}>
+          <Tooltip content="View note">
+            <Box>
+              <Pencil1Icon />
+              <VisuallyHidden>View note</VisuallyHidden>
+            </Box>
+          </Tooltip>
         </Link>
       </IconButton>
-    </Tooltip>
+    );
+  return (
+    <IconButton variant="outline" asChild>
+      <Link to="/notes/edit/$id" params={{ id: id }} search={search}>
+        <Tooltip content="Edit note">
+          <Box>
+            <Pencil1Icon />
+            <VisuallyHidden>Edit</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </Link>
+    </IconButton>
   );
 }
 
@@ -80,19 +84,23 @@ function DeleteNote({ id, deleted }: { id: string; deleted: boolean }) {
   if (deleted)
     return (
       <IconButton variant="outline" disabled={true} asChild>
+        <Tooltip content="Delete note">
+          <Box>
+            <TrashIcon />
+            <VisuallyHidden>Delete note</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </IconButton>
+    );
+  return (
+    <IconButton variant="outline" onClick={onClick} disabled={disabled}>
+      <Tooltip content="Delete note">
         <Box>
           <TrashIcon />
           <VisuallyHidden>Delete note</VisuallyHidden>
         </Box>
-      </IconButton>
-    );
-  return (
-    <Tooltip content="Delete note">
-      <IconButton variant="outline" onClick={onClick} disabled={disabled}>
-        <TrashIcon />
-        <VisuallyHidden>Delete note</VisuallyHidden>
-      </IconButton>
-    </Tooltip>
+      </Tooltip>
+    </IconButton>
   );
 }
 
