@@ -9,6 +9,7 @@ import { Box } from "@radix-ui/themes";
 import { useState } from "react";
 import { Editor } from "../-editor";
 import { NoteMeta } from "@/core/models";
+import { ensureDefined } from "@/utils/ensureDefined";
 
 export const Route = createFileRoute("/notes/view/$id")({
   component: Component,
@@ -30,7 +31,7 @@ export function Note({ id }: { id: string }) {
 
   // this is useful to prevent rerendering when data change is caused by an external event
   // which is currently not hapenning
-  const [meta] = useState(useNoteMeta(id).data);
+  const [meta] = useState(ensureDefined(useNoteMeta(id)).data);
   const [contents] = useState(useNoteContents(id).data);
   if (!meta?.btime) return <NotFound currentId={id} />;
   if (meta.trash) return <Deleted meta={meta} contents={contents} />;

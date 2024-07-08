@@ -49,6 +49,7 @@ function Contents({ close }: { close: () => void }) {
   return (
     <Flex direction="column" gap="1">
       <TextField.Root
+        className="fuzzy__input"
         value={query}
         onKeyDown={onKeyDown}
         onChange={(e) => setQuery(e.target.value)}
@@ -90,7 +91,7 @@ export function Fuzzy() {
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
         <Tooltip content="[ctrl+k] Fuzzy search title">
-          <IconButton>
+          <IconButton variant="outline">
             <MagnifyingGlassIcon />
             <VisuallyHidden>Fuzzy search title</VisuallyHidden>
           </IconButton>

@@ -14,13 +14,15 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
 /* import ToolbarPlugin from "./plugins/toolBar"; */
-import { Box, Button, Card, Flex } from "@radix-ui/themes";
+import { Box, Button, Card, DataList, Flex } from "@radix-ui/themes";
 import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { serialize } from "./encoding";
 import { NavNotes } from "./navNotes";
 
 export function EditorCreate({ id }: { id: string }) {
-  const meta = { ...noteZero, id };
+  const searchTag = useSearch({ from: "/notes" }).tag.trim(); // all special values are reduced to empty string
+  const tags = searchTag ? [searchTag] : [];
+  const meta = { ...noteZero, tags, id };
   const contents = contentsZero;
   return (
     <Editor meta={meta} contents={contents} editable={true} deleted={false} />
@@ -61,7 +63,14 @@ export function Editor({
         <NavNotes id={meta.id} deleted={deleted} />
         {deleted && <Deleted id={meta.id} />}
         {/* <ToolbarPlugin /> */}
-        <TagBar id={meta.id} />
+        <DataList.Root>
+          <DataList.Item>
+            <DataList.Label>Tags</DataList.Label>
+            <DataList.Value>
+              <TagBar meta={meta} />
+            </DataList.Value>
+          </DataList.Item>
+        </DataList.Root>
         <Box overflowY="auto">
           <Card className="editor" onClick={handleDoubleClick}>
             <RichTextPlugin

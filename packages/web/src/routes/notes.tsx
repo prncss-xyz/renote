@@ -30,6 +30,7 @@ import { NoteMeta } from "@/core/models";
 import { Fuzzy } from "./-fuzzy";
 import { ProcessedNotesProvider } from "./notes/-processedNotes/provider";
 import { useProcessedNotes } from "./notes/-processedNotes/hooks";
+import { Selector } from "./-selector";
 
 export const Route = createFileRoute("/notes")({
   component: Component,
@@ -48,6 +49,7 @@ export function Component() {
             <VisitTrash />
             <CreateNote />
           </Flex>
+          <Selector />
           <Flex direction="row" gap="1" justify="between" align="center">
             <SortBy />
             <Dir />
@@ -140,11 +142,9 @@ function VisitTrash() {
 }
 
 function CreateNote() {
-  const { pathname } = useLocation();
   const search = useSearch({ from: Route.fullPath });
-  const disabled = pathname === "/notes/create";
   return (
-    <IconButton disabled={disabled} asChild>
+    <IconButton variant="outline" asChild>
       <Link to="/notes/create" search={search}>
         <Tooltip content="Create note">
           <Box>

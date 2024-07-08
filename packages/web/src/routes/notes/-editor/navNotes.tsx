@@ -124,7 +124,7 @@ function SelectNote({
     );
   return (
     <IconButton variant="outline" asChild>
-      <Link to="/notes/edit/$id" params={{ id: target.id }} search={search}>
+      <Link to="/notes/view/$id" params={{ id: target.id }} search={search}>
         {children}
       </Link>
     </IconButton>

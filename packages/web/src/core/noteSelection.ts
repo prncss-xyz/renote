@@ -13,11 +13,16 @@ function validateSortBy(sortBy: unknown) {
   return typeof sortBy === "string" ? sortBy in sortByNames : false;
 }
 
+export enum SearchTag {
+  NO_SELECTION = "",
+  UNTAGGED = " ",
+}
+
 export const selectNotesOptsSchema = z.object({
   asc: z.boolean().catch(false),
   sortBy: z.custom<SortByOpts>(validateSortBy).catch(sortByZero),
   trash: z.boolean().catch(false),
-  tags: z.union([z.array(z.string()), z.literal("untagged")]).catch([]),
+  tag: z.string().catch(SearchTag.NO_SELECTION),
 });
 
 export type SelectNotesOpts = z.infer<typeof selectNotesOptsSchema>;
@@ -26,7 +31,7 @@ export const selectNotesOptsZero: SelectNotesOpts = {
   asc: false,
   sortBy: sortByZero,
   trash: false,
-  tags: [],
+  tag: "",
 };
 
 export interface ExpendNotesOpts {
@@ -71,28 +76,26 @@ export function isSearchable(note: NoteMeta) {
   return note.btime && !note.trash && note.title.length > 0;
 }
 
-function intersects<T>(a: T[], b: T[]) {
-  return a.some((x) => b.includes(x));
-}
-
 export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
   const allTags = new Set<string>();
-  let unTagged = false;
+  let untagged = false;
   const expend: ExpendNotesOpts = expendNotesOptsZero;
   const filteredNotes: NoteMeta[] = [];
   for (const note of notes) {
     if (!note.btime) continue;
     if (note.tags.length) note.tags.forEach((tag) => allTags.add(tag));
-    else unTagged = true;
+    else untagged = true;
     if (note.trash === true) {
       expend.trash = true;
     }
     if (note.trash !== search.trash) continue;
     expend.tags.push(...note.tags);
-    if (search.tags === "untagged") {
-      if (!search.tags.length) continue;
+    if (search.tag === SearchTag.UNTAGGED) {
+      if (note.tags.length) continue;
+    } else if (search.tag === SearchTag.NO_SELECTION) {
+      // do nothing
     } else {
-      if (search.tags.length && !intersects(note.tags, search.tags)) continue;
+      if (!note.tags.includes(search.tag)) continue;
     }
     filteredNotes.push(note);
   }
@@ -104,7 +107,7 @@ export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
     expend,
     notes: filteredNotes,
     allTags: Array.from(allTags).sort(),
-    unTagged,
+    untagged,
   };
 }
 

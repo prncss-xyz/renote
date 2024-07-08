@@ -49,7 +49,7 @@ export function useNoteMeta(id: string) {
     return meta ? [meta] : [];
   }).data;
   const data = notesMeta[0];
-  if (!data) throw new Error(`Note ${id} not found`);
+  if (!data) return undefined;
   return { data };
 }
 
@@ -135,7 +135,8 @@ export function useUpsertNoteMeta() {
 export function useUpsertNoteMetaValue(meta: Partial<MetaPayload>) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, mtime }: MetaUpdate) => upsertDbNoteMeta({ ...meta, id, mtime }),
+    mutationFn: ({ id, mtime }: MetaUpdate) =>
+      upsertDbNoteMeta({ ...meta, id, mtime }),
     onMutate: async ({ id, mtime }) => {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: ["notes", "metadata"] }),

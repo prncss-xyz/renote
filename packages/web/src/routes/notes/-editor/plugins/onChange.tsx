@@ -3,7 +3,7 @@ import { useCallback, useEffect } from "react";
 import { MetaUpdate, NoteMeta } from "@/core/models";
 import { useFlushedDebounced } from "@/utils/deduper";
 import { useUpsertNote } from "@/db";
-import { useLocation, useNavigate, useSearch } from "@tanstack/react-router";
+import { useLocation } from "@tanstack/react-router";
 import { deserialize } from "../encoding";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,28 +44,12 @@ export function OnChangePlugin({
 }) {
   const [editor] = useLexicalComposerContext();
   const { mutate } = useUpsertNote();
-  const navigate = useNavigate();
   const pathname = useLocation({ select: ({ pathname }) => pathname });
-  const search = useSearch({ from: "/notes" });
   const localCommit = useCallback(
-    ({ meta, contents, pathname }: Data) => {
-      mutate(
-        { meta, contents },
-        {
-          onSettled: () => {
-            if (pathname === "/notes/create")
-              navigate({
-                to: "/notes/edit/$id",
-                params: {
-                  id: meta.id,
-                },
-                search,
-              });
-          },
-        },
-      );
+    ({ meta, contents }: Data) => {
+      mutate({ meta, contents });
     },
-    [mutate, navigate, search],
+    [mutate],
   );
   const update = useFlushedDebounced(500, (data: Data) => localCommit(data));
   useEffect(() => {

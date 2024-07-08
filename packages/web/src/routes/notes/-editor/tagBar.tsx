@@ -3,13 +3,14 @@ import { useReset } from "@/utils/reset";
 import {
   Cross2Icon,
   MagnifyingGlassIcon,
+  Pencil1Icon,
   PlusIcon,
 } from "@radix-ui/react-icons";
 import {
   Badge,
   Box,
   Button,
-  CheckboxGroup,
+  Checkbox,
   Dialog,
   Flex,
   IconButton,
@@ -17,28 +18,65 @@ import {
   Tooltip,
   VisuallyHidden,
 } from "@radix-ui/themes";
-import { deepEqual } from "@tanstack/react-router";
-import { useCallback, useMemo, useState } from "react";
+import { Link, useSearch } from "@tanstack/react-router";
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 import { useProcessedNotes } from "../-processedNotes/hooks";
 import { useHotkeyHandler } from "@/hooks/hotkey";
+import { matchQuery } from "@/utils/normalize";
+import { dequal } from "dequal";
+import { NoteMeta } from "@/core/models";
 
-function Tag({ name }: { name: string }) {
-  return <Badge>{name}</Badge>;
+function TagBadge({ name }: { name: string }) {
+  const search = useSearch({ from: "/notes" });
+  return (
+    <Link search={{ ...search, tag: name }}>
+      <Badge>{name}</Badge>
+    </Link>
+  );
 }
 
 const localBindings = {
-  toggleTag: { key: "Enter" },
+  applyTag: { key: "Enter" },
   confirm: { key: "Enter", ctrl: true },
 };
 
-function toggle<T>(xs: T[], x: T) {
-  const index = xs.indexOf(x);
-  if (index === -1) {
-    // TODO: use collator
-    return [...xs, x].sort();
-  } else {
-    return [...xs.slice(0, index), ...xs.slice(index + 1)];
-  }
+function toggle<T>(x: T) {
+  return function (xs: T[]) {
+    const index = xs.indexOf(x);
+    if (index === -1) {
+      // TODO: use collator
+      return [...xs, x].sort();
+    } else {
+      return [...xs.slice(0, index), ...xs.slice(index + 1)];
+    }
+  };
+}
+
+function TagCheckbox({
+  tag,
+  checked,
+  onValueChange,
+}: {
+  tag: string;
+  checked: boolean;
+  onValueChange: Dispatch<SetStateAction<string[]>>;
+}) {
+  return (
+    <Flex key={tag} direction="row" align="center" gap="2">
+      <Checkbox
+        value={tag}
+        checked={checked}
+        onCheckedChange={() => onValueChange(toggle(tag))}
+      />
+      <label>{tag}</label>
+    </Flex>
+  );
 }
 
 function Content({
@@ -51,41 +89,38 @@ function Content({
   close: () => void;
 }) {
   const allTags = useProcessedNotes((state) => state.allTags);
-  const [tags, setTags] = useState(allTags);
-  const [chosenTags, setChosenTags] = useState(init);
+  const [selectedTags, setSelectedTags] = useState(init);
   const [filter, setFilter] = useState("");
-  const visibleTags = useMemo(
-    () => tags.filter((tag) => tag.includes(filter)),
-    [filter, tags],
+  const filteredAllTags = useMemo(
+    () => allTags.filter((tag) => matchQuery(tag, filter)),
+    [allTags, filter],
   );
-
-  const createTag = useCallback(() => {
-    // TODO: use collator
-    const tag = filter.trim();
-    if (!tag) return;
-    setTags([...tags, tag].sort());
-    setChosenTags([...tags, tag].sort());
-    setFilter("");
-  }, [filter, tags, setFilter, setTags, setChosenTags]);
+  const filteredSelectedTags = useMemo(
+    () => selectedTags.filter((tag) => matchQuery(tag, filter)),
+    [selectedTags, filter],
+  );
+  const filterTrimmed = filter.trim();
+  const createDisabled =
+    filterTrimmed.length === 0 ||
+    selectedTags.includes(filter) ||
+    allTags.includes(filter);
   const { onKeyDown, useRegister } = useHotkeyHandler(localBindings);
-  const toggleTag = useCallback(() => {
-    const firstTag = visibleTags.at(0);
-    if (firstTag) {
-      setChosenTags(toggle(chosenTags, firstTag));
-      setFilter("");
-      return;
-    }
-    createTag();
-  }, [chosenTags, createTag, visibleTags]);
-  useRegister("toggleTag", toggleTag);
-  const { mutate } = useUpsertNoteMetaValue({ tags: chosenTags });
+  const applyTag = useCallback(() => {
+    const tag =
+      filteredSelectedTags.at(0) || filteredAllTags.at(0) || filterTrimmed;
+    if (!tag) return; // do not create empty tag
+    setSelectedTags(toggle(tag)(selectedTags));
+    setFilter("");
+  }, [filteredSelectedTags, filteredAllTags, filterTrimmed, selectedTags]);
+  useRegister("applyTag", applyTag);
+  const { mutate } = useUpsertNoteMetaValue({ tags: selectedTags });
 
-  const disabled = deepEqual(chosenTags, init);
+  const confirmDisabled = dequal(init, selectedTags);
   const confirm = useCallback(() => {
-    if (disabled) return;
+    if (confirmDisabled) return;
     close();
     mutate({ id, mtime: Date.now() });
-  }, [close, disabled, id, mutate]);
+  }, [close, confirmDisabled, id, mutate]);
   useRegister("confirm", confirm);
   return (
     <Dialog.Content aria-describedby={undefined}>
@@ -111,19 +146,27 @@ function Content({
             </TextField.Slot>
           </TextField.Root>
         </Flex>
-        <CheckboxGroup.Root
-          value={chosenTags}
-          onValueChange={setChosenTags}
-          style={{ maxHeight: 100, overflowY: "auto" }}
-        >
-          {visibleTags.map((tag) => (
-            <CheckboxGroup.Item key={tag} value={tag}>
-              {tag}
-            </CheckboxGroup.Item>
-          ))}
-        </CheckboxGroup.Root>
-        {filter.length > 0 && !tags.includes(filter) && (
-          <Button variant="ghost" onClick={createTag}>
+        {filteredSelectedTags.map((tag) => (
+          <TagCheckbox
+            key={tag}
+            tag={tag}
+            checked={true}
+            onValueChange={setSelectedTags}
+          />
+        ))}
+        {filteredAllTags.map(
+          (tag) =>
+            filteredSelectedTags.includes(tag) || (
+              <TagCheckbox
+                key={tag}
+                tag={tag}
+                checked={false}
+                onValueChange={setSelectedTags}
+              />
+            ),
+        )}
+        {createDisabled || (
+          <Button variant="ghost" onClick={applyTag}>
             <PlusIcon />
             <Box style={{ textAlign: "start", width: "100%" }}>
               Create <b>{filter}</b>
@@ -131,7 +174,7 @@ function Content({
           </Button>
         )}
         <Flex direction="row" gap="2">
-          <Button variant="solid" onClick={confirm} disabled={disabled}>
+          <Button variant="solid" onClick={confirm} disabled={confirmDisabled}>
             Confirm
           </Button>
           <Dialog.Close>
@@ -143,28 +186,29 @@ function Content({
   );
 }
 
-export function TagBar({ id }: { id: string }) {
-  const tags = useNoteMeta(id).data.tags;
+export function TagBar({ meta }: { meta: NoteMeta }) {
+  const search = useSearch({ from: "/notes" }).tag.trim(); // all special values are reduced to empty string
+  const tags = useNoteMeta(meta.id)?.data.tags ?? (search ? [search] : []);
   const [key, reset] = useReset();
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), [setOpen]);
   return (
-    <Flex align="center" gap="1" wrap="wrap">
+    <Flex align="center" gap="2" wrap="wrap">
       {tags.map((tag) => (
-        <Tag key={tag} name={tag} />
+        <TagBadge key={tag} name={tag} />
       ))}
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Trigger onClick={reset}>
           <IconButton variant="ghost">
-            <Tooltip content="Change tags">
-              <Box>
-                <PlusIcon />
-                <VisuallyHidden>Change tags</VisuallyHidden>
-              </Box>
+            <Tooltip content="Edit tags">
+              <Flex align="center">
+                <Pencil1Icon />
+                <VisuallyHidden>Edit tags</VisuallyHidden>
+              </Flex>
             </Tooltip>
           </IconButton>
         </Dialog.Trigger>
-        <Content key={key} id={id} init={tags} close={close} />
+        <Content key={key} id={meta.id} init={tags} close={close} />
       </Dialog.Root>
     </Flex>
   );
