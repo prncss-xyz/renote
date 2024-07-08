@@ -20,12 +20,19 @@ import { serialize } from "./encoding";
 import { NavNotes } from "./navNotes";
 
 export function EditorCreate({ id }: { id: string }) {
+  /*
   const searchTag = useSearch({ from: "/notes" }).tag.trim(); // all special values are reduced to empty string
   const tags = searchTag ? [searchTag] : [];
   const meta = { ...noteZero, tags, id };
-  const contents = contentsZero;
+  */
+  const meta = { ...noteZero, id };
   return (
-    <Editor meta={meta} contents={contents} editable={true} deleted={false} />
+    <Editor
+      meta={meta}
+      contents={contentsZero}
+      editable={true}
+      deleted={false}
+    />
   );
 }
 

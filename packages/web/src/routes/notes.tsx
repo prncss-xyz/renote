@@ -1,10 +1,5 @@
 import { ensureNotesMeta } from "@/db";
-import {
-  Outlet,
-  createFileRoute,
-  useLocation,
-  useNavigate,
-} from "@tanstack/react-router";
+import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
