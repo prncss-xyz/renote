@@ -136,6 +136,7 @@ function useEdit(id: string, deleted: boolean) {
 }
 
 function onError(error: unknown) {
+  // eslint-disable-next-line no-console
   console.error(error);
 }
 

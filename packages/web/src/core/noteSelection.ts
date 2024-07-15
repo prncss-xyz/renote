@@ -22,26 +22,30 @@ export const selectNotesOptsSchema = z.object({
   asc: z.boolean().catch(false),
   sortBy: z.custom<SortByOpts>(validateSortBy).catch(sortByZero),
   trash: z.boolean().catch(false),
+  archive: z.boolean().catch(false),
   tag: z.string().catch(SearchTag.NO_SELECTION),
 });
 
 export type SelectNotesOpts = z.infer<typeof selectNotesOptsSchema>;
 
-export const selectNotesOptsZero: SelectNotesOpts = {
+export const selectNotesOptsZero: Readonly<SelectNotesOpts> = {
   asc: false,
   sortBy: sortByZero,
   trash: false,
-  tag: "",
+  archive: false,
+  tag: SearchTag.NO_SELECTION,
 };
 
 export interface ExpendNotesOpts {
   trash: boolean;
-  tags: string[];
+  archive: boolean;
+  untagged: boolean;
 }
 
-const expendNotesOptsZero: ExpendNotesOpts = {
+const expendNotesOptsZero: Readonly<ExpendNotesOpts> = {
   trash: false,
-  tags: [],
+  archive: false,
+  untagged: false,
 };
 
 function btimeSort(a: NoteMeta, b: NoteMeta) {
@@ -72,24 +76,32 @@ function getSortCb(sortBy: SortByOpts) {
   }
 }
 
+// wether to show note in fuzzy search
 export function isSearchable(note: NoteMeta) {
   return note.btime && !note.trash && note.title.length > 0;
 }
 
 export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
   const allTags = new Set<string>();
-  let untagged = false;
-  const expend: ExpendNotesOpts = expendNotesOptsZero;
+  const expend = { ...expendNotesOptsZero };
   const filteredNotes: NoteMeta[] = [];
   for (const note of notes) {
+    // skip purged note
     if (!note.btime) continue;
-    if (note.tags.length) note.tags.forEach((tag) => allTags.add(tag));
-    else untagged = true;
+
     if (note.trash === true) {
       expend.trash = true;
     }
+    if (note.archive === true) {
+      expend.archive = true;
+    }
+
     if (note.trash !== search.trash) continue;
-    expend.tags.push(...note.tags);
+
+    if (note.tags.length) note.tags.forEach((tag) => allTags.add(tag));
+    else expend.untagged = true;
+    if (note.archive && !search.archive) continue;
+    // filter
     if (search.tag === SearchTag.UNTAGGED) {
       if (note.tags.length) continue;
     } else if (search.tag === SearchTag.NO_SELECTION) {
@@ -99,7 +111,7 @@ export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
     }
     filteredNotes.push(note);
   }
-  const sgn = search.asc ? 1 : -1;
+  const sgn = search.asc ? -1 : 1;
   const cb = getSortCb(search.sortBy);
   filteredNotes.sort((a, b) => sgn * cb(a, b));
   // TDDO: use collator
@@ -107,7 +119,6 @@ export function processNotes(search: SelectNotesOpts, notes: NoteMeta[]) {
     expend,
     notes: filteredNotes,
     allTags: Array.from(allTags).sort(),
-    untagged,
   };
 }
 

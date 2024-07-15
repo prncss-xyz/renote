@@ -7,7 +7,8 @@ export interface MetaPayload {
   // btime <= mtime <= ttime
   btime: number; // creation of note;
   ttime: number; // last modification of contents
-  trash: boolean; // wether not is in trash
+  trash: boolean; // wether not is in trashed
+  archive: boolean; // wether not is in archived
   title: string;
   tags: string[];
 }
@@ -22,6 +23,7 @@ export const noteZero: NoteMeta = {
   btime: 0,
   ttime: 0,
   trash: false,
+  archive: false,
   title: "",
   tags: [],
 };
