@@ -67,7 +67,7 @@ export function Editor({
       }}
     >
       <Flex direction="column" gap="2" overflow="hidden">
-        <NavNotes id={meta.id} deleted={deleted} />
+        <NavNotes id={meta.id} deleted={deleted} archived={meta.archive} />
         {deleted && <Deleted id={meta.id} />}
         {/* <ToolbarPlugin /> */}
         <DataList.Root>

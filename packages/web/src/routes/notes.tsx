@@ -3,6 +3,7 @@ import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
+  BackpackIcon,
   PlusIcon,
   TrashIcon,
 } from "@radix-ui/react-icons";
@@ -41,6 +42,7 @@ export function Component() {
         <Flex direction="column" width="250px" gap="2">
           <Flex direction="row" gap="1">
             <Fuzzy />
+            {import.meta.env.DEV && <IncludeArchived />}
             <VisitTrash />
             <CreateNote />
           </Flex>
@@ -101,6 +103,37 @@ function Dir() {
       <ArrowDownIcon />
       <VisuallyHidden>Sort by descending</VisuallyHidden>
     </Link>
+  );
+}
+
+function IncludeArchived() {
+  const search = useSearch({ from: Route.fullPath });
+  const archive = useProcessedNotes(({ expend }) => expend.archive);
+  if (search.archive) {
+    return (
+      <IconButton variant="solid" asChild>
+        <Link to="/" search={{ ...search, archive: false }}>
+          <Tooltip content="Exclude archived notes">
+            <Box>
+              <BackpackIcon />
+              <VisuallyHidden>Exclude archived notes</VisuallyHidden>
+            </Box>
+          </Tooltip>
+        </Link>
+      </IconButton>
+    );
+  }
+  return (
+    <IconButton variant="outline" disabled={!archive} asChild>
+      <Link to="/" search={{ ...search, archive: true }}>
+        <Tooltip content="Include archived notes">
+          <Box>
+            <BackpackIcon />
+            <VisuallyHidden>Include archived notes</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </Link>
+    </IconButton>
   );
 }
 

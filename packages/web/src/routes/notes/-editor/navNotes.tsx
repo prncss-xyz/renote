@@ -1,5 +1,5 @@
 import { NoteMeta } from "@/core/models";
-import { useDeleteNote } from "@/db";
+import { useArchiveNote, useDeleteNote } from "@/db";
 import {
   TrashIcon,
   DoubleArrowLeftIcon,
@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   Pencil1Icon,
+  BackpackIcon,
 } from "@radix-ui/react-icons";
 import {
   Box,
@@ -20,7 +21,15 @@ import { ReactNode } from "react";
 import { useRemove } from "./remove";
 import { useProcessedNotes } from "../-processedNotes/hooks";
 
-export function NavNotes({ id, deleted }: { id: string; deleted: boolean }) {
+export function NavNotes({
+  id,
+  deleted,
+  archived,
+}: {
+  id: string;
+  deleted: boolean;
+  archived: boolean;
+}) {
   return (
     <Flex justify="end" gap="1">
       <Edit id={id} deleted={deleted} />
@@ -28,6 +37,7 @@ export function NavNotes({ id, deleted }: { id: string; deleted: boolean }) {
       <Previous id={id} />
       <Next id={id} />
       <Last id={id} />
+      {import.meta.env.DEV && <ToggleArchive id={id} archived={archived} />}
       <DeleteNote id={id} deleted={deleted} />
     </Flex>
   );
@@ -72,6 +82,35 @@ function Edit({ id, deleted }: { id: string; deleted: boolean }) {
           </Box>
         </Tooltip>
       </Link>
+    </IconButton>
+  );
+}
+
+// TODO: make reactive
+function ToggleArchive({ id, archived }: { id: string; archived: boolean }) {
+  const { mutate } = useArchiveNote(!archived);
+  const onClick = () => mutate({ id, mtime: Date.now() });
+  const { pathname } = useLocation();
+  const disabled = pathname === "/notes/create";
+  if (archived)
+    return (
+      <IconButton variant="solid" onClick={onClick} disabled={disabled}>
+        <Tooltip content="Archive note">
+          <Box>
+            <BackpackIcon />
+            <VisuallyHidden>Archive note</VisuallyHidden>
+          </Box>
+        </Tooltip>
+      </IconButton>
+    );
+  return (
+    <IconButton variant="outline" onClick={onClick} disabled={disabled}>
+      <Tooltip content="Archive note">
+        <Box>
+          <BackpackIcon />
+          <VisuallyHidden>Archive note</VisuallyHidden>
+        </Box>
+      </Tooltip>
     </IconButton>
   );
 }

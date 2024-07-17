@@ -36,14 +36,26 @@ export function Note({ id }: { id: string }) {
   if (!meta?.btime) return <NotFound currentId={id} />;
   if (meta.trash) return <Deleted meta={meta} contents={contents} />;
   return (
-    <Editor meta={meta} contents={contents} editable={false} deleted={false} />
+    <Editor
+      meta={meta}
+      contents={contents}
+      editable={false}
+      deleted={false}
+      archived={meta.archive}
+    />
   );
 }
 
 function Deleted({ meta, contents }: { meta: NoteMeta; contents: string }) {
   return (
     <>
-      <Editor meta={meta} contents={contents} editable={false} deleted={true} />
+      <Editor
+        meta={meta}
+        contents={contents}
+        editable={false}
+        deleted={true}
+        archived={meta.archive}
+      />
     </>
   );
 }

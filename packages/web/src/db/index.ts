@@ -186,6 +186,10 @@ export function useNoteContents(id: string) {
   return useSuspenseQuery(getNoteContentsOpts(id));
 }
 
+export function useArchiveNote(archive: boolean) {
+  return useUpsertNoteMetaValue({ archive });
+}
+
 export function useDeleteNote() {
   return useUpsertNoteMetaValue({ trash: true });
 }
