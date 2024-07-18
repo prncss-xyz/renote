@@ -1,25 +1,25 @@
 .notes__list__link {
-  text-decoration: none;
-  color: var(--gray-12);
-  &:hover {
-    color: var(--accent-10);
-  }
-  &.active {
-    background-color: var(--gray-5);
-  }
+	text-decoration: none;
+	color: var(--gray-12);
+	&:hover {
+		color: var(--accent-10);
+	}
+	&.active {
+		background-color: var(--gray-5);
+	}
 }
 .notes__dir__link {
-  color: var(--gray-12);
-  &:hover {
-    color: var(--accent-10);
-  }
+	color: var(--gray-12);
+	&:hover {
+		color: var(--accent-10);
+	}
 }
 
 .fuzzy__item {
-  text-decoration: none;
-  color: var(--gray-11);
+	text-decoration: none;
+	color: var(--gray-11);
 }
 
 .fuzzy__highlight {
-  color: var(--accent-10);
+	color: var(--accent-10);
 }
