@@ -22,6 +22,7 @@ const context: MyRooterContext = {
 }
 
 const router = createRouter({
+	basepath: '/renote/',
 	routeTree,
 	context,
 	defaultPreloadStaleTime: 0,
@@ -36,7 +37,7 @@ declare module '@tanstack/react-router' {
 
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
-	const root = ReactDOM.createRoot(rootElement)
+	const root = ReactDOM.createRoot(rootElement, {})
 	root.render(
 		<StrictMode>
 			<QueryClientProvider client={queryClient}>
