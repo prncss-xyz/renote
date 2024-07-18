@@ -1,0 +1,13 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/build
+      - name: Run tests
+        run: pnpm run test:coverage
