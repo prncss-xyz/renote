@@ -11,118 +11,118 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/index'
-import { Route as NotesImport } from './routes/notes'
-import { Route as NotesCreateImport } from './routes/notes/create'
-import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
-import { Route as NotesEmptyImport } from './routes/notes/empty'
-import { Route as NotesViewIdImport } from './routes/notes/view/$id'
 import { Route as SettingsImport } from './routes/settings'
+import { Route as NotesImport } from './routes/notes'
+import { Route as IndexImport } from './routes/index'
+import { Route as NotesEmptyImport } from './routes/notes/empty'
+import { Route as NotesCreateImport } from './routes/notes/create'
+import { Route as NotesViewIdImport } from './routes/notes/view/$id'
+import { Route as NotesEditIdImport } from './routes/notes/edit/$id'
 
 // Create/Update Routes
 
 const SettingsRoute = SettingsImport.update({
-	path: '/settings',
-	getParentRoute: () => rootRoute,
+  path: '/settings',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const NotesRoute = NotesImport.update({
-	path: '/notes',
-	getParentRoute: () => rootRoute,
+  path: '/notes',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const IndexRoute = IndexImport.update({
-	path: '/',
-	getParentRoute: () => rootRoute,
+  path: '/',
+  getParentRoute: () => rootRoute,
 } as any)
 
 const NotesEmptyRoute = NotesEmptyImport.update({
-	path: '/empty',
-	getParentRoute: () => NotesRoute,
+  path: '/empty',
+  getParentRoute: () => NotesRoute,
 } as any)
 
 const NotesCreateRoute = NotesCreateImport.update({
-	path: '/create',
-	getParentRoute: () => NotesRoute,
+  path: '/create',
+  getParentRoute: () => NotesRoute,
 } as any)
 
 const NotesViewIdRoute = NotesViewIdImport.update({
-	path: '/view/$id',
-	getParentRoute: () => NotesRoute,
+  path: '/view/$id',
+  getParentRoute: () => NotesRoute,
 } as any)
 
 const NotesEditIdRoute = NotesEditIdImport.update({
-	path: '/edit/$id',
-	getParentRoute: () => NotesRoute,
+  path: '/edit/$id',
+  getParentRoute: () => NotesRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
-	interface FileRoutesByPath {
-		'/': {
-			id: '/'
-			path: '/'
-			fullPath: '/'
-			preLoaderRoute: typeof IndexImport
-			parentRoute: typeof rootRoute
-		}
-		'/notes': {
-			id: '/notes'
-			path: '/notes'
-			fullPath: '/notes'
-			preLoaderRoute: typeof NotesImport
-			parentRoute: typeof rootRoute
-		}
-		'/settings': {
-			id: '/settings'
-			path: '/settings'
-			fullPath: '/settings'
-			preLoaderRoute: typeof SettingsImport
-			parentRoute: typeof rootRoute
-		}
-		'/notes/create': {
-			id: '/notes/create'
-			path: '/create'
-			fullPath: '/notes/create'
-			preLoaderRoute: typeof NotesCreateImport
-			parentRoute: typeof NotesImport
-		}
-		'/notes/empty': {
-			id: '/notes/empty'
-			path: '/empty'
-			fullPath: '/notes/empty'
-			preLoaderRoute: typeof NotesEmptyImport
-			parentRoute: typeof NotesImport
-		}
-		'/notes/edit/$id': {
-			id: '/notes/edit/$id'
-			path: '/edit/$id'
-			fullPath: '/notes/edit/$id'
-			preLoaderRoute: typeof NotesEditIdImport
-			parentRoute: typeof NotesImport
-		}
-		'/notes/view/$id': {
-			id: '/notes/view/$id'
-			path: '/view/$id'
-			fullPath: '/notes/view/$id'
-			preLoaderRoute: typeof NotesViewIdImport
-			parentRoute: typeof NotesImport
-		}
-	}
+  interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/notes': {
+      id: '/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof NotesImport
+      parentRoute: typeof rootRoute
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsImport
+      parentRoute: typeof rootRoute
+    }
+    '/notes/create': {
+      id: '/notes/create'
+      path: '/create'
+      fullPath: '/notes/create'
+      preLoaderRoute: typeof NotesCreateImport
+      parentRoute: typeof NotesImport
+    }
+    '/notes/empty': {
+      id: '/notes/empty'
+      path: '/empty'
+      fullPath: '/notes/empty'
+      preLoaderRoute: typeof NotesEmptyImport
+      parentRoute: typeof NotesImport
+    }
+    '/notes/edit/$id': {
+      id: '/notes/edit/$id'
+      path: '/edit/$id'
+      fullPath: '/notes/edit/$id'
+      preLoaderRoute: typeof NotesEditIdImport
+      parentRoute: typeof NotesImport
+    }
+    '/notes/view/$id': {
+      id: '/notes/view/$id'
+      path: '/view/$id'
+      fullPath: '/notes/view/$id'
+      preLoaderRoute: typeof NotesViewIdImport
+      parentRoute: typeof NotesImport
+    }
+  }
 }
 
 // Create and export the route tree
 
 export const routeTree = rootRoute.addChildren({
-	IndexRoute,
-	NotesRoute: NotesRoute.addChildren({
-		NotesCreateRoute,
-		NotesEmptyRoute,
-		NotesEditIdRoute,
-		NotesViewIdRoute,
-	}),
-	SettingsRoute,
+  IndexRoute,
+  NotesRoute: NotesRoute.addChildren({
+    NotesCreateRoute,
+    NotesEmptyRoute,
+    NotesEditIdRoute,
+    NotesViewIdRoute,
+  }),
+  SettingsRoute,
 })
 
 /* prettier-ignore-end */

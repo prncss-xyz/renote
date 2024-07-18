@@ -42,7 +42,6 @@ export function Note({ id }: { id: string }) {
 			contents={contents}
 			editable={false}
 			deleted={false}
-			archived={meta.archive}
 		/>
 	)
 }
@@ -55,7 +54,6 @@ function Deleted({ meta, contents }: { meta: NoteMeta; contents: string }) {
 				contents={contents}
 				editable={false}
 				deleted={true}
-				archived={meta.archive}
 			/>
 		</>
 	)

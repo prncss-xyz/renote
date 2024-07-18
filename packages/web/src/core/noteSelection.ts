@@ -30,7 +30,7 @@ export const selectNotesOptsSchema = z.object({
 export type SelectNotesOpts = z.infer<typeof selectNotesOptsSchema>
 
 export const selectNotesOptsZero: Readonly<SelectNotesOpts> = {
-	asc: false,
+	asc: true,
 	sortBy: sortByZero,
 	trash: false,
 	archive: false,
