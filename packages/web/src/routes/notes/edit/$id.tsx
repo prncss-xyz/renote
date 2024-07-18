@@ -33,6 +33,6 @@ export function Note({ id }: { id: string }) {
   const [contents] = useState(useNoteContents(id).data);
   if (!meta?.btime) return <Navigate to={`/notes/edit/${id}`} />;
   return (
-    <Editor meta={meta} contents={contents} editable={true} deleted={false} archived={meta.archive} />
+    <Editor meta={meta} contents={contents} editable={true} deleted={false} />
   );
 }

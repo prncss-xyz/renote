@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Checkbox,
+  DataList,
   Dialog,
   Flex,
   IconButton,
@@ -193,23 +194,34 @@ export function TagBar({ meta }: { meta: NoteMeta }) {
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), [setOpen]);
   return (
-    <Flex align="center" gap="2" wrap="wrap">
-      {tags.map((tag) => (
-        <TagBadge key={tag} name={tag} />
-      ))}
-      <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Trigger onClick={reset}>
-          <IconButton variant="ghost">
-            <Tooltip content="Edit tags">
-              <Flex align="center">
-                <Pencil1Icon />
-                <VisuallyHidden>Edit tags</VisuallyHidden>
-              </Flex>
-            </Tooltip>
-          </IconButton>
-        </Dialog.Trigger>
-        <Content key={key} id={meta.id} init={tags} close={close} />
-      </Dialog.Root>
-    </Flex>
+    <DataList.Item>
+      <DataList.Label>
+        <Dialog.Root open={open} onOpenChange={setOpen}>
+          <Dialog.Trigger onClick={reset}>
+            <Flex justify="start" align="center" gap="2">
+              Tags
+              <IconButton variant="ghost">
+                <Flex align="center" justify="start">
+                  <Tooltip content="Edit tags">
+                    <Box>
+                      <Pencil1Icon width={13} height={13} />
+                      <VisuallyHidden>Edit tags</VisuallyHidden>
+                    </Box>
+                  </Tooltip>
+                </Flex>
+              </IconButton>
+            </Flex>
+          </Dialog.Trigger>
+          <Content key={key} id={meta.id} init={tags} close={close} />
+        </Dialog.Root>
+      </DataList.Label>
+      <DataList.Value>
+        <Flex align="center" gap="2" wrap="wrap">
+          {tags.map((tag) => (
+            <TagBadge key={tag} name={tag} />
+          ))}
+        </Flex>
+      </DataList.Value>
+    </DataList.Item>
   );
 }

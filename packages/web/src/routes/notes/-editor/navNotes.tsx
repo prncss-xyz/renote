@@ -8,9 +8,12 @@ import {
   ArrowRightIcon,
   Pencil1Icon,
   BackpackIcon,
+  HamburgerMenuIcon,
+  Cross2Icon,
 } from "@radix-ui/react-icons";
 import {
   Box,
+  Dialog,
   Flex,
   IconButton,
   Tooltip,
@@ -20,6 +23,7 @@ import { useSearch, Link, useLocation } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { useRemove } from "./remove";
 import { useProcessedNotes } from "../-processedNotes/hooks";
+import { NotesSelector } from "../-notesSelector";
 
 export function NavNotes({
   id,
@@ -31,15 +35,49 @@ export function NavNotes({
   archived: boolean;
 }) {
   return (
-    <Flex justify="end" gap="1">
-      <Edit id={id} deleted={deleted} />
-      <First id={id} />
-      <Previous id={id} />
-      <Next id={id} />
-      <Last id={id} />
-      {import.meta.env.DEV && <ToggleArchive id={id} archived={archived} />}
-      <DeleteNote id={id} deleted={deleted} />
+    <Flex justify="between" gap="1" flexGrow="1">
+      <Menu />
+      <Flex justify="end" gap="1" flexGrow="1">
+        <Edit id={id} deleted={deleted} />
+        <First id={id} />
+        <Previous id={id} />
+        <Next id={id} />
+        <Last id={id} />
+        {import.meta.env.DEV && <ToggleArchive id={id} archived={archived} />}
+        <DeleteNote id={id} deleted={deleted} />
+      </Flex>
     </Flex>
+  );
+}
+
+function Menu() {
+  return (
+    <Box display={{ initial: "block", sm: "none" }}>
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <IconButton variant="outline">
+            <Tooltip content="Notes selection">
+              <Box>
+                <HamburgerMenuIcon />
+                <VisuallyHidden>Notes selection</VisuallyHidden>
+              </Box>
+            </Tooltip>
+          </IconButton>
+        </Dialog.Trigger>
+        <Dialog.Content aria-describedby={undefined}>
+          <Flex direction="row" justify="between" gap="1">
+            <Dialog.Title>Notes selection</Dialog.Title>
+            <Dialog.Close>
+              <Flex>
+                <Cross2Icon />
+                <VisuallyHidden>Close</VisuallyHidden>
+              </Flex>
+            </Dialog.Close>
+          </Flex>
+          <NotesSelector />
+        </Dialog.Content>
+      </Dialog.Root>
+    </Box>
   );
 }
 

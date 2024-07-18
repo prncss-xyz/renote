@@ -1,4 +1,5 @@
 import {
+  Box,
   Dialog,
   Flex,
   IconButton,
@@ -63,7 +64,7 @@ function Contents({ close }: { close: () => void }) {
           <Dialog.Close key={choice.obj.id}>
             <Link
               className="fuzzy__item"
-              to="/notes/edit/$id"
+              to="/notes/view/$id"
               params={{ id: choice.obj.id }}
               search={selectNotesOptsZero}
               dangerouslySetInnerHTML={{
@@ -90,12 +91,14 @@ export function Fuzzy() {
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger>
-        <Tooltip content="[ctrl+k] Fuzzy search title">
-          <IconButton variant="outline">
-            <MagnifyingGlassIcon />
-            <VisuallyHidden>Fuzzy search title</VisuallyHidden>
-          </IconButton>
-        </Tooltip>
+        <IconButton variant="outline">
+          <Tooltip content="[ctrl+k] Fuzzy search title">
+            <Box>
+              <MagnifyingGlassIcon />
+              <VisuallyHidden>Fuzzy search title</VisuallyHidden>
+            </Box>
+          </Tooltip>
+        </IconButton>
       </Dialog.Trigger>
       <Dialog.Content maxWidth="450px" aria-describedby={undefined}>
         <Flex direction="row" justify="between" gap="1">

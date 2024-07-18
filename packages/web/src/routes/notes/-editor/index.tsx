@@ -14,7 +14,14 @@ import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
 import { CodeNode } from "@lexical/code";
 
 /* import ToolbarPlugin from "./plugins/toolBar"; */
-import { Box, Button, Card, DataList, Flex } from "@radix-ui/themes";
+import {
+  Box,
+  Button,
+  Card,
+  DataList,
+  Flex,
+  ScrollArea,
+} from "@radix-ui/themes";
 import { NoteMeta, contentsZero, noteZero } from "@/core/models";
 import { serialize } from "./encoding";
 import { NavNotes } from "./navNotes";
@@ -66,19 +73,14 @@ export function Editor({
         editable,
       }}
     >
-      <Flex direction="column" gap="2" overflow="hidden">
+      <Flex direction="column" gap="2" flexGrow="1">
         <NavNotes id={meta.id} deleted={deleted} archived={meta.archive} />
         {deleted && <Deleted id={meta.id} />}
         {/* <ToolbarPlugin /> */}
         <DataList.Root>
-          <DataList.Item>
-            <DataList.Label>Tags</DataList.Label>
-            <DataList.Value>
-              <TagBar meta={meta} />
-            </DataList.Value>
-          </DataList.Item>
+          <TagBar meta={meta} />
         </DataList.Root>
-        <Box overflowY="auto">
+        <ScrollArea type="auto" scrollbars="vertical">
           <Card className="editor" onClick={handleDoubleClick}>
             <RichTextPlugin
               contentEditable={<ContentEditable />}
@@ -86,7 +88,7 @@ export function Editor({
               ErrorBoundary={LexicalErrorBoundary}
             />
           </Card>
-        </Box>
+        </ScrollArea>
         <MarkdownShortcutPlugin />
         <AutoFocusPlugin />
         <OnChangePlugin meta={meta} contents={contents} />

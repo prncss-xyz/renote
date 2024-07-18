@@ -19,7 +19,7 @@ export enum SearchTag {
 }
 
 export const selectNotesOptsSchema = z.object({
-  asc: z.boolean().catch(false),
+  asc: z.boolean().catch(true),
   sortBy: z.custom<SortByOpts>(validateSortBy).catch(sortByZero),
   trash: z.boolean().catch(false),
   archive: z.boolean().catch(false),

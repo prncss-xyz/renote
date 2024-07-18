@@ -43,12 +43,12 @@ const showThemePanel = false;
 
 function Component() {
   return (
-    <Flex direction="column" height="100vh" maxHeight="100vh" gap="3">
+    <Flex direction="column" gap="3">
       <TabNav.Root>
         <Notes />
         <Settings />
       </TabNav.Root>
-      <Flex px="2">
+      <Flex px="2" maxHeight="calc(100vh - 80px)">
         <Outlet />
       </Flex>
       <TanStackRouterDevtools />
