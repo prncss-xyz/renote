@@ -14,8 +14,8 @@ dist-ssr
 .env
 
 # Editor directories and files
-coverage/*
-.vscode/*
+coverage/
+.vscode/
 !.vscode/extensions.json
 .idea
 .DS_Store
@@ -25,4 +25,5 @@ coverage/*
 *.sln
 *.sw?
 
+# vitest
 vite.config.ts.timestamp-*

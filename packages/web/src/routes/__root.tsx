@@ -8,7 +8,7 @@ import {
 	Outlet,
 	useLocation,
 } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/router-devtools'
+import { lazy, Suspense } from 'react'
 
 export const Route = createRootRouteWithContext<MyRooterContext>()({
 	component: Component,
@@ -38,6 +38,17 @@ function Settings() {
 	)
 }
 
+function CondTanStackRouterDevtools() {
+	if (!import.meta.env.DEV) return null
+	return lazy(
+		() =>
+			import('@tanstack/router-devtools').then((res) => ({
+				default: res.TanStackRouterDevtools,
+			})),
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	) as any
+}
+
 const showThemePanel = false
 
 function Component() {
@@ -50,9 +61,11 @@ function Component() {
 			<Flex px="2" maxHeight="calc(100vh - 80px)">
 				<Outlet />
 			</Flex>
-			<TanStackRouterDevtools />
+			<Suspense fallback={null}>
+				<CondTanStackRouterDevtools />
+			</Suspense>
 			<ReactQueryDevtools initialIsOpen={false} />
-			{showThemePanel && <ThemePanel />}
+			{import.meta.env.DEV && showThemePanel && <ThemePanel />}
 		</Flex>
 	)
 }
