@@ -1,15 +1,23 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
-import path from "path";
+import path from 'path'
+import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+function getBasePath() {
+	const repo = process.env.GITHUB_REPOSITORY
+	if (!repo) return undefined
+	const [, name] = repo.split('/')
+	if (!name) return undefined
+	return `/${name}`
+}
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/renote/",
-  plugins: [TanStackRouterVite(), react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-});
+	base: getBasePath(),
+	plugins: [TanStackRouterVite(), react()],
+	resolve: {
+		alias: {
+			'@': path.resolve(__dirname, './src'),
+		},
+	},
+})

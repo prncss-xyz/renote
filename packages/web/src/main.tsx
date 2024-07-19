@@ -22,7 +22,7 @@ const context: MyRooterContext = {
 }
 
 const router = createRouter({
-	basepath: '/renote/',
+	basepath: import.meta.env.BASE_URL,
 	routeTree,
 	context,
 	defaultPreloadStaleTime: 0,

@@ -1,14 +1,14 @@
 import { selectNotesOptsZero } from '@/core/noteSelection'
 import { MyRooterContext } from '@/main'
-import { Flex, TabNav, ThemePanel } from '@radix-ui/themes'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { Flex, TabNav } from '@radix-ui/themes'
 import {
-	createRootRouteWithContext,
-	Link,
-	Outlet,
-	useLocation,
+    createRootRouteWithContext,
+    Link,
+    Outlet,
+    useLocation,
 } from '@tanstack/react-router'
-import { lazy, Suspense } from 'react'
+
+import { DevTools } from './-devTools'
 
 export const Route = createRootRouteWithContext<MyRooterContext>()({
 	component: Component,
@@ -38,18 +38,6 @@ function Settings() {
 	)
 }
 
-function CondTanStackRouterDevtools() {
-	if (!import.meta.env.DEV) return null
-	return lazy(
-		() =>
-			import('@tanstack/router-devtools').then((res) => ({
-				default: res.TanStackRouterDevtools,
-			})),
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	) as any
-}
-
-const showThemePanel = false
 
 function Component() {
 	return (
@@ -61,11 +49,7 @@ function Component() {
 			<Flex px="2" maxHeight="calc(100vh - 80px)">
 				<Outlet />
 			</Flex>
-			<Suspense fallback={null}>
-				<CondTanStackRouterDevtools />
-			</Suspense>
-			<ReactQueryDevtools initialIsOpen={false} />
-			{import.meta.env.DEV && showThemePanel && <ThemePanel />}
+			<DevTools />
 		</Flex>
 	)
 }
