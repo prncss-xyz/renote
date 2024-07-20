@@ -10,6 +10,5 @@ export const Route = createFileRoute('/')({
 
 function Component() {
 	const { to } = useSearch({ from: Route.fullPath })
-	console.log('Component to: %s', to) // __AUTO_GENERATED_PRINT_VAR_END__
 	return <Navigate to={to} />
 }
