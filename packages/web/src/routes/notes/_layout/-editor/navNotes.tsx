@@ -89,15 +89,17 @@ function Edit({ id, deleted }: { id: string; deleted: boolean }) {
 	const search = useSearch({ from })
 	const disabled =
 		pathname.startsWith('/notes/edit') || pathname.startsWith('/notes/create')
-	if (deleted)
+	if (!id || deleted)
 		return (
 			<IconButton variant="outline" disabled={true} asChild>
-				<Tooltip content="Edit note">
-					<Box>
-						<Pencil1Icon />
-						<VisuallyHidden>Edit note</VisuallyHidden>
-					</Box>
-				</Tooltip>
+				<Link>
+					<Tooltip content="Edit note">
+						<Box>
+							<Pencil1Icon />
+							<VisuallyHidden>Edit note</VisuallyHidden>
+						</Box>
+					</Tooltip>
+				</Link>
 			</IconButton>
 		)
 	if (disabled)
@@ -132,7 +134,7 @@ function ToggleArchive({ id, archived }: { id: string; archived: boolean }) {
 	const { mutate } = useArchiveNote(!archived)
 	const onClick = () => mutate({ id, mtime: Date.now() })
 	const { pathname } = useLocation()
-	const disabled = pathname === '/notes/create'
+	const disabled = !id || pathname === '/notes/create'
 	if (archived)
 		return (
 			<IconButton variant="solid" onClick={onClick} disabled={disabled}>
@@ -160,7 +162,7 @@ function DeleteNote({ id, deleted }: { id: string; deleted: boolean }) {
 	const { mutate } = useDeleteNote()
 	const onClick = useRemove(id, mutate)
 	const { pathname } = useLocation()
-	const disabled = pathname === '/notes/create'
+	const disabled = !id || pathname === '/notes/create'
 	if (deleted)
 		return (
 			<IconButton variant="outline" disabled={true} asChild>
@@ -195,7 +197,7 @@ function SelectNote({
 }) {
 	const target = useProcessedNotes((state) => select(state.notes))
 	const search = useSearch({ from })
-	const disabled = !target || target?.id === id
+	const disabled = !id || !target || target?.id === id
 	if (disabled)
 		return (
 			<IconButton variant="outline" disabled={true}>
