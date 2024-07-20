@@ -10,9 +10,9 @@
     "test:lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "test:types": "tsc --noEmit",
     "format": "prettier --write ./src",
-    "format:lint": "eslint . --ext ts,tsx,js,jsx --fix",
+    "format:lint": "eslint . --ext ts,tsx,js,jsx --report-unused-disable-directives --max-warnings 0",
     "build": "tsc -b && vite build",
-    "start": "vite preview"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@lexical/code": "^0.16.1",

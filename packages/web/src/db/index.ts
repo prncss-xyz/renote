@@ -1,4 +1,5 @@
 import { MetaPayload, MetaUpdate, NoteMeta, noteZero } from '@/core/models'
+import { getUUID } from '@/utils/uuid';
 import {
 	QueryClient,
 	queryOptions,
@@ -7,13 +8,19 @@ import {
 	useSuspenseQuery,
 } from '@tanstack/react-query'
 import { openDB } from 'idb'
+import { firstNote } from './firstNote';
 
-const dbPromise = openDB('notes', 1, {
-	upgrade(db) {
-		db.createObjectStore('contents')
-		db.createObjectStore('metadata', { keyPath: 'id' })
-	},
-})
+const dbPromise = openDB("notes", 1, {
+  upgrade(db, _oldVersion, _newVersion, tx) {
+    db.createObjectStore("contents");
+    db.createObjectStore("metadata", { keyPath: "id" });
+    const id = getUUID();
+    const mtime = Date.now();
+    tx.objectStore("metadata").put({ ...noteZero, id, mtime, btime: mtime, ttime: mtime, title: "Welcome to Renote" });
+    tx.objectStore("contents").put(firstNote, id);
+    return tx.done;
+  },
+});
 
 async function getNotesMeta(): Promise<NoteMeta[]> {
 	const db = await dbPromise
