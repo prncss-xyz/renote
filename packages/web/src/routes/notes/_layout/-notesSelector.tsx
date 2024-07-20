@@ -1,10 +1,9 @@
-import { NoteMeta } from '@/core/models'
 import { sortByNames, SortByOpts } from '@/core/noteSelection'
-import { Fuzzy } from '@/routes/-fuzzy'
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
 	BackpackIcon,
+	MagnifyingGlassIcon,
 	PlusIcon,
 	TrashIcon,
 } from '@radix-ui/react-icons'
@@ -14,17 +13,23 @@ import {
 	IconButton,
 	ScrollArea,
 	Select,
+	TextField,
 	Tooltip,
 	VisuallyHidden,
 } from '@radix-ui/themes'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import fuzzysort from 'fuzzysort'
+import { useMemo, useState } from 'react'
 
 import { useProcessedNotes } from './-processedNotes/hooks'
 import { Selector } from './-selector'
 
+const highlightClass = 'fuzzy__highlight'
+
 const from = '/notes/_layout'
 
 export function NotesSelector() {
+	const [query, setQuery] = useState('')
 	return (
 		<Flex
 			direction="column"
@@ -36,18 +41,27 @@ export function NotesSelector() {
 			}}
 		>
 			<Flex direction="row" gap="1">
-				<Fuzzy />
+				{/* <Fuzzy /> */}
 				{import.meta.env.DEV && <IncludeArchived />}
 				<VisitTrash />
 				<CreateNote />
 			</Flex>
 			<Selector />
+			<TextField.Root
+				className="fuzzy__input"
+				value={query}
+				onChange={(e) => setQuery(e.target.value)}
+			>
+				<TextField.Slot>
+					<MagnifyingGlassIcon />
+				</TextField.Slot>
+			</TextField.Root>
 			<Flex direction="row" gap="1" justify="between" align="center">
 				<SortBy />
 				<Dir />
 			</Flex>
 			<ScrollArea type="auto" scrollbars="vertical">
-				<NotesList />
+				<NotesList query={query} />
 			</ScrollArea>
 		</Flex>
 	)
@@ -129,7 +143,6 @@ function IncludeArchived() {
 
 function VisitTrash() {
 	const search = useSearch({ from })
-	// FIX: this value is not reactive
 	const trash = useProcessedNotes(({ expend }) => expend.trash)
 	if (search.trash) {
 		return (
@@ -175,33 +188,49 @@ function CreateNote() {
 	)
 }
 
-function NotesList() {
+function NotesList({ query }: { query: string }) {
 	const search = useSearch({ from })
 	const notes = useProcessedNotes(({ notes }) => notes)
+	const choices = useMemo(
+		() =>
+			fuzzysort.go(query, notes, {
+				key: 'title',
+				limit: 5,
+				all: true,
+			}),
+		[query, notes],
+	)
 	return (
 		<>
-			{notes.map((note) => (
+			{choices.map((choice) => (
 				<Link
-					key={note.id}
+					key={choice.obj.id}
 					to="/notes/view/$id"
 					params={{
-						id: note.id,
+						id: choice.obj.id,
 					}}
 					search={search}
 					className="notes__list__link"
 				>
-					<Note note={note} />
+					{choice.obj.title ? (
+						<Flex
+							px="2"
+							justify="start"
+							dangerouslySetInnerHTML={{
+								__html: choice.highlight(
+									`<span class="${highlightClass}">`,
+									`</span>`,
+								),
+							}}
+						/>
+					) : (
+						<Flex px="2" justify="start" style={{ fontStyle: 'italic' }}>
+							{toDate(choice.obj.btime, true)}
+						</Flex>
+					)}
 				</Link>
 			))}
 		</>
-	)
-}
-
-function Note({ note }: { note: NoteMeta }) {
-	return note.title ? (
-		<NoteWithTitle title={note.title} />
-	) : (
-		<NoteWithDate date={note.btime} />
 	)
 }
 
@@ -213,20 +242,4 @@ function toDate(btime: number, time: boolean) {
 	if (!time) return d
 	const [h, m] = rest.split(':')
 	return `${d} ${h}:${m}`
-}
-
-function NoteWithTitle({ title }: { title: string }) {
-	return (
-		<Flex px="2" justify="start">
-			{title}
-		</Flex>
-	)
-}
-
-function NoteWithDate({ date }: { date: number }) {
-	return (
-		<Flex px="2" justify="start" style={{ fontStyle: 'italic' }}>
-			{toDate(date, true)}
-		</Flex>
-	)
 }

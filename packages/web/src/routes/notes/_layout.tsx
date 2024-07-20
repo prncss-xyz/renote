@@ -14,7 +14,6 @@ export const Route = createFileRoute('/notes/_layout')({
 	validateSearch: selectNotesOptsSchema,
 })
 
-// FIX: Route.fullPath is undefined
 const from = '/notes/_layout'
 
 export function Component() {

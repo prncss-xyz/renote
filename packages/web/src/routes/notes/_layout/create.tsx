@@ -8,7 +8,6 @@ export const Route = createFileRoute('/notes/_layout/create')({
 	loader: getUUID,
 })
 
-// FIX: Route.fullPath is undefined
 const from = '/notes/_layout/create'
 
 function Component() {
