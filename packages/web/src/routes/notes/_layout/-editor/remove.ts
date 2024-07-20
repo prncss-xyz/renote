@@ -14,7 +14,7 @@ export function useRemove(
 ) {
 	const shouldDelete = useRef(false)
 	const { navigate } = useRouter()
-	const search = useSearch({ from: '/notes' })
+	const search = useSearch({ from: '/notes/_layout' })
 	const notes = useProcessedNotes((state) => state.notes)
 	const onClick = useCallback(() => {
 		const id_ = findNext(notes, id)

@@ -28,6 +28,8 @@ import { useCallback } from 'react'
 import { useRemove } from './remove'
 import { TagBar } from './tagBar'
 
+const from = '/notes/_layout'
+
 export function EditorCreate({ id }: { id: string }) {
 	/*
   const searchTag = useSearch({ from: "/notes" }).tag.trim(); // all special values are reduced to empty string
@@ -120,7 +122,7 @@ function useEdit(id: string, deleted: boolean) {
 	const { pathname } = useLocation()
 	const disabled = pathname.startsWith('/notes/edit')
 	const { navigate } = useRouter()
-	const search = useSearch({ from: '/notes' })
+	const search = useSearch({ from })
 	return useCallback(() => {
 		if (disabled || deleted) return
 		navigate({

@@ -26,6 +26,8 @@ import { NotesSelector } from '../-notesSelector'
 import { useProcessedNotes } from '../-processedNotes/hooks'
 import { useRemove } from './remove'
 
+const from = '/notes/_layout'
+
 export function NavNotes({
 	id,
 	deleted,
@@ -84,7 +86,7 @@ function Menu() {
 
 function Edit({ id, deleted }: { id: string; deleted: boolean }) {
 	const { pathname } = useLocation()
-	const search = useSearch({ from: '/notes' })
+	const search = useSearch({ from })
 	const disabled =
 		pathname.startsWith('/notes/edit') || pathname.startsWith('/notes/create')
 	if (deleted)
@@ -101,7 +103,7 @@ function Edit({ id, deleted }: { id: string; deleted: boolean }) {
 	if (disabled)
 		return (
 			<IconButton variant="solid" asChild>
-				<Link to="/notes/view/$id" params={{ id: id }} search={search}>
+				<Link to="/notes/edit/$id" params={{ id }} search={search}>
 					<Tooltip content="View note">
 						<Box>
 							<Pencil1Icon />
@@ -192,7 +194,7 @@ function SelectNote({
 	children: ReactNode
 }) {
 	const target = useProcessedNotes((state) => select(state.notes))
-	const search = useSearch({ from: '/notes' })
+	const search = useSearch({ from })
 	const disabled = !target || target?.id === id
 	if (disabled)
 		return (

@@ -12,7 +12,7 @@ import { useState } from 'react'
 
 import { Editor } from '../-editor'
 
-export const Route = createFileRoute('/notes/view/$id')({
+export const Route = createFileRoute('/notes/_layout/view/$id')({
 	component: Component,
 	loader: ({ params: { id }, context: { queryClient } }) =>
 		Promise.all([

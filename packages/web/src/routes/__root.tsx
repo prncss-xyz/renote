@@ -1,11 +1,10 @@
-import { selectNotesOptsZero } from '@/core/noteSelection'
 import { MyRooterContext } from '@/main'
 import { Flex, TabNav } from '@radix-ui/themes'
 import {
-    createRootRouteWithContext,
-    Link,
-    Outlet,
-    useLocation,
+	createRootRouteWithContext,
+	Link,
+	Outlet,
+	useLocation,
 } from '@tanstack/react-router'
 
 import { DevTools } from './-devTools'
@@ -20,9 +19,7 @@ function Notes() {
 	})
 	return (
 		<TabNav.Link active={active} asChild>
-			<Link to="/" search={selectNotesOptsZero}>
-				Notes
-			</Link>
+			<Link to="/notes">Notes</Link>
 		</TabNav.Link>
 	)
 }
@@ -37,7 +34,6 @@ function Settings() {
 		</TabNav.Link>
 	)
 }
-
 
 function Component() {
 	return (

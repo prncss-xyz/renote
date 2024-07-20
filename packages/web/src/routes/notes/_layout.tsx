@@ -5,17 +5,20 @@ import { createFileRoute, Outlet, useSearch } from '@tanstack/react-router'
 
 import './notes.css'
 
-import { NotesSelector } from './notes/-notesSelector'
-import { ProcessedNotesProvider } from './notes/-processedNotes/provider'
+import { NotesSelector } from './_layout/-notesSelector'
+import { ProcessedNotesProvider } from './_layout/-processedNotes/provider'
 
-export const Route = createFileRoute('/notes')({
+export const Route = createFileRoute('/notes/_layout')({
 	component: Component,
 	loader: ({ context: { queryClient } }) => ensureNotesMeta(queryClient),
 	validateSearch: selectNotesOptsSchema,
 })
 
+// FIX: Route.fullPath is undefined
+const from = '/notes/_layout'
+
 export function Component() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	return (
 		<ProcessedNotesProvider search={search}>
 			<Flex gap="3" flexGrow="1">

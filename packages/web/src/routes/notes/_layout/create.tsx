@@ -3,13 +3,16 @@ import { createFileRoute, useLoaderData } from '@tanstack/react-router'
 
 import { EditorCreate } from './-editor'
 
-export const Route = createFileRoute('/notes/create')({
+export const Route = createFileRoute('/notes/_layout/create')({
 	component: Component,
 	loader: getUUID,
 })
 
+// FIX: Route.fullPath is undefined
+const from = '/notes/_layout/create'
+
 function Component() {
-	const id = useLoaderData({ from: Route.fullPath })
+	const id = useLoaderData({ from })
 	// we assert this because we have had issues with the loader not firing
 	if (!id) throw new Error('id is required')
 	return <EditorCreate id={id} />

@@ -28,6 +28,8 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 
 import { useProcessedNotes } from '../-processedNotes/hooks'
 
+const from = '/notes/_layout'
+
 function TagBadge({ name }: { name: string }) {
 	const search = useSearch({ from: '/notes' })
 	return (
@@ -183,7 +185,7 @@ function Content({
 }
 
 export function TagBar({ meta }: { meta: NoteMeta }) {
-	const search = useSearch({ from: '/notes' }).tag.trim() // all special values are reduced to empty string
+	const search = useSearch({ from }).tag.trim() // all special values are reduced to empty string
 	const tags = useNoteMeta(meta.id)?.data.tags ?? (search ? [search] : [])
 	const [key, reset] = useReset()
 	const [open, setOpen] = useState(false)

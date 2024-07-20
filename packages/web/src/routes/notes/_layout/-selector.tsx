@@ -4,8 +4,7 @@ import { normalizeQuery } from '@/utils/normalize'
 import { Box, Button, Flex, Popover, TextField } from '@radix-ui/themes'
 import { useRouter, useSearch } from '@tanstack/react-router'
 import { useCallback, useState } from 'react'
-
-import { useProcessedNotes } from './notes/-processedNotes/hooks'
+import { useProcessedNotes } from './-processedNotes/hooks'
 
 function Tag({ tag }: { tag: string }) {
 	if (tag === SearchTag.NO_SELECTION || tag === SearchTag.UNTAGGED) {
@@ -77,7 +76,7 @@ function Contents({ close }: { close: () => void }) {
 }
 
 export function Selector() {
-	const { tag } = useSearch({ from: '/notes' })
+	const { tag } = useSearch({ from: '/notes/_layout' })
 	const [open, setOpen] = useState(false)
 	const close = useCallback(() => setOpen(false), [])
 	return (

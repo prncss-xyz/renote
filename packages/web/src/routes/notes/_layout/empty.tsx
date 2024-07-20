@@ -1,12 +1,15 @@
 import { Flex } from '@radix-ui/themes'
 import { createFileRoute, useSearch } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/notes/empty')({
+export const Route = createFileRoute('/notes/_layout/empty')({
 	component: Component,
 })
 
+// FIX: Route.fullPath is undefined
+const from = '/notes/_layout/empty'
+
 function Component() {
-	const { trash } = useSearch({ from: Route.fullPath })
+	const { trash } = useSearch({ from })
 	return (
 		<Flex px="1">
 			{trash

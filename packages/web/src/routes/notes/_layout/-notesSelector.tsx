@@ -1,5 +1,6 @@
 import { NoteMeta } from '@/core/models'
 import { sortByNames, SortByOpts } from '@/core/noteSelection'
+import { Fuzzy } from '@/routes/-fuzzy'
 import {
 	ArrowDownIcon,
 	ArrowUpIcon,
@@ -18,10 +19,10 @@ import {
 } from '@radix-ui/themes'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 
-import { Fuzzy } from '../-fuzzy'
-import { Selector } from '../-selector'
-import { Route } from '../notes'
 import { useProcessedNotes } from './-processedNotes/hooks'
+import { Selector } from './-selector'
+
+const from = '/notes/_layout'
 
 export function NotesSelector() {
 	return (
@@ -53,7 +54,7 @@ export function NotesSelector() {
 }
 
 function SortBy() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	const navigate = useNavigate()
 	return (
 		<Select.Root
@@ -77,7 +78,7 @@ function SortBy() {
 }
 
 function Dir() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	const { asc } = search
 	// visually hidden describes the effect of the link, not the actual state
 	if (asc)
@@ -96,12 +97,12 @@ function Dir() {
 }
 
 function IncludeArchived() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	const archive = useProcessedNotes(({ expend }) => expend.archive)
 	if (search.archive) {
 		return (
 			<IconButton variant="solid" asChild>
-				<Link to="/" search={{ ...search, archive: false }}>
+				<Link to="/notes" search={{ ...search, archive: false }}>
 					<Tooltip content="Exclude archived notes">
 						<Box>
 							<BackpackIcon />
@@ -114,7 +115,7 @@ function IncludeArchived() {
 	}
 	return (
 		<IconButton variant="outline" disabled={!archive} asChild>
-			<Link to="/" search={{ ...search, archive: true }}>
+			<Link to="/notes" search={{ ...search, archive: true }}>
 				<Tooltip content="Include archived notes">
 					<Box>
 						<BackpackIcon />
@@ -127,13 +128,13 @@ function IncludeArchived() {
 }
 
 function VisitTrash() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	// FIX: this value is not reactive
 	const trash = useProcessedNotes(({ expend }) => expend.trash)
 	if (search.trash) {
 		return (
 			<IconButton variant="solid" asChild>
-				<Link to="/" search={{ ...search, trash: false }}>
+				<Link to="/notes" search={{ ...search, trash: false }}>
 					<Tooltip content="Leave trash bin">
 						<Box>
 							<TrashIcon />
@@ -146,7 +147,7 @@ function VisitTrash() {
 	}
 	return (
 		<IconButton variant="outline" disabled={!trash} asChild>
-			<Link to="/" search={{ ...search, trash: true }}>
+			<Link to="/notes" search={{ ...search, trash: true }}>
 				<Tooltip content="Visit trash bin">
 					<Box>
 						<TrashIcon />
@@ -159,7 +160,7 @@ function VisitTrash() {
 }
 
 function CreateNote() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	return (
 		<IconButton variant="outline" asChild>
 			<Link to="/notes/create" search={search}>
@@ -175,14 +176,13 @@ function CreateNote() {
 }
 
 function NotesList() {
-	const search = useSearch({ from: Route.fullPath })
+	const search = useSearch({ from })
 	const notes = useProcessedNotes(({ notes }) => notes)
 	return (
 		<>
 			{notes.map((note) => (
 				<Link
 					key={note.id}
-					from={Route.fullPath}
 					to="/notes/view/$id"
 					params={{
 						id: note.id,
