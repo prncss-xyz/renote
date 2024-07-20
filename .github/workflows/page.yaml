@@ -23,9 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
-      - name: Setup Base Path
-        run: echo BASE_PATH=$(basename $GITHUB_REPOSITORY) > .env
-        working-directory: packages/web
       - name: Build
         working-directory: packages/web
         run: pnpm run build
