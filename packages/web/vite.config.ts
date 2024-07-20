@@ -3,17 +3,11 @@ import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
-function getBasePath() {
-	const repo = process.env.GITHUB_REPOSITORY
-	if (!repo) return undefined
-	const [, name] = repo.split('/')
-	if (!name) return undefined
-	return `/${name}`
-}
+console.log('>>> BASE_PATH: %s', process.env.BASE_PATH)
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	base: getBasePath(),
+	base: process.env.BASE_PATH,
 	plugins: [TanStackRouterVite(), react()],
 	resolve: {
 		alias: {
