@@ -5,14 +5,14 @@ on:
     branches:
       - main
     paths:
-      - "packages/web/**"
+      - 'packages/web/**'
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: "pages"
+  group: 'pages'
   cancel-in-progress: true
 jobs:
   deploy:
@@ -23,7 +23,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/build
-      - run: echo BASE_PATH=$(basename $GITHUB_REPOSITORY) > .env
+      - name: Setup Base Path
+        run: echo BASE_PATH=$(basename $GITHUB_REPOSITORY) > .env
+        working-directory: packages/web
       - name: Build
         working-directory: packages/web
         run: pnpm run build
@@ -32,7 +34,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./packages/web/dist"
+          path: './packages/web/dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
