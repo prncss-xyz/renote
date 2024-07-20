@@ -1,4 +1,5 @@
-import { createFileRoute, Navigate, useSearch } from '@tanstack/react-router'
+import { createFileRoute, useSearch } from '@tanstack/react-router'
+import { useEffect } from 'react'
 import { z } from 'zod'
 
 export const Route = createFileRoute('/')({
@@ -21,5 +22,8 @@ function decodePath(path: string) {
 function Component() {
 	const { path } = useSearch({ from: Route.fullPath })
 	const to = path ? decodePath(path) : '/notes'
-	return <Navigate to={to} replace={true} />
+	useEffect(() => {
+		window.location.replace(to)
+	}, [to])
+	return null
 }
