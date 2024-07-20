@@ -23,7 +23,7 @@ function Component() {
 	const { path } = useSearch({ from: Route.fullPath })
 	const to = path ? decodePath(path) : '/notes'
 	useEffect(() => {
-		window.location.replace(to)
+		window.location.replace(`${import.meta.env.BASE_URL}/${to}`)
 	}, [to])
 	return null
 }
